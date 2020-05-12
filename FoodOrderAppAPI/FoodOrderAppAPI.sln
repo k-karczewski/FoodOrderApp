@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.29920.165
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodOrderAppAPI", "FoodOrderAppAPI.csproj", "{EB86B0B4-8860-407E-8F35-8CBF72F89895}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodOrderApp.Models", "..\FoodOrderApp.Models\FoodOrderApp.Models.csproj", "{229ABE27-2BA0-4173-9CC9-C4744FCB6701}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodOrderApp.Data", "..\FoodOrderApp.Data\FoodOrderApp.Data.csproj", "{D9AE03B6-AF9F-45AB-AABC-FA41CB1A42EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{EB86B0B4-8860-407E-8F35-8CBF72F89895}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB86B0B4-8860-407E-8F35-8CBF72F89895}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB86B0B4-8860-407E-8F35-8CBF72F89895}.Release|Any CPU.Build.0 = Release|Any CPU
+		{229ABE27-2BA0-4173-9CC9-C4744FCB6701}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{229ABE27-2BA0-4173-9CC9-C4744FCB6701}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{229ABE27-2BA0-4173-9CC9-C4744FCB6701}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{229ABE27-2BA0-4173-9CC9-C4744FCB6701}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9AE03B6-AF9F-45AB-AABC-FA41CB1A42EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9AE03B6-AF9F-45AB-AABC-FA41CB1A42EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9AE03B6-AF9F-45AB-AABC-FA41CB1A42EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9AE03B6-AF9F-45AB-AABC-FA41CB1A42EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
