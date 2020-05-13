@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FoodOrderApp.Interfaces\FoodOrderApp.Interfaces.csproj" />
     <ProjectReference Include="..\FoodOrderApp.Models\FoodOrderApp.Models.csproj" />
   </ItemGroup>
 
