@@ -12,6 +12,7 @@ namespace FoodOrderApp.Interfaces.Repositories
     {
         Task<bool> CreateAsync(TEntity newObject);
         Task<bool> DeleteAsync(int id);
+        Task<bool> UpdateAsync(TEntity editedObject);
         Task<IEnumerable<TEntity>> GetByExpressionAsync(Expression<Func<TEntity, bool>> selector = null, 
                                            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> include = null);
 

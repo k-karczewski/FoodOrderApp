@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FoodOrderApp.Models.PizzaModels
+namespace FoodOrderApp.Models.PizzaModels.PriceModels
 {
     public class IngredientPriceModel : PriceModel
     {

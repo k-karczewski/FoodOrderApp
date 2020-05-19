@@ -28,28 +28,28 @@ namespace FoodOrderApp.Data.Repositories
            
             if (_context.Entry(newObject).State == EntityState.Added)
             {
-                await CommitChanges();
+                await CommitChangesAsync();
                 return true;
             }
             else
             {
-                return false;
+                throw new Exception("Object cannot be created");
             }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            TEntity objectToDelete = await GetById(id);
+            TEntity objectToDelete = await GetByIdAsync(id);
 
             if (objectToDelete != null)
             {
                 _dbSet.Remove(objectToDelete);
-                await CommitChanges();
+                await CommitChangesAsync();
                 return true;
             }
             else
             {
-                return false;
+                throw new Exception("Object cannot be deleted");
             } 
         }
 
@@ -71,14 +71,28 @@ namespace FoodOrderApp.Data.Repositories
             return query;
         }
 
-        private async Task<TEntity> GetById(int id)
+        public async Task<bool> UpdateAsync(TEntity editedObject)
         {
-            TEntity objectFromDb = await _dbSet.FindAsync(id);
+            _context.Set<TEntity>().Update(editedObject);
+            await CommitChangesAsync();
 
-            return objectFromDb;
+            return true; 
         }
 
-        private async Task<bool> CommitChanges()
+
+        private async Task<TEntity> GetByIdAsync(int id)
+        {
+            TEntity objectFromDb = await _dbSet.FindAsync(id);
+            
+            if(objectFromDb == null)
+            {
+                throw new Exception("Object has not been found");
+            }
+
+            return objectFromDb; 
+        }
+
+        private async Task<bool> CommitChangesAsync()
         {
             return await _context.SaveChangesAsync() != 0 ? true : false;
         }

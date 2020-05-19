@@ -8,4 +8,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FoodOrderApp.Models\FoodOrderApp.Models.csproj" />
+  </ItemGroup>
+
 </Project>

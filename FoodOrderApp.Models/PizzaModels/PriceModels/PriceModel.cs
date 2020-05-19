@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FoodOrderApp.Models.PizzaModels.PriceModels
 {
-    public class PriceModel
+    public abstract class PriceModel
     {
         public int Id { get; set; }
         public SizeEnum Size { get; set; }
