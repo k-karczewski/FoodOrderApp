@@ -10,7 +10,7 @@ namespace FoodOrderApp.Data.DataContext
     public class FoodOrderContext : DbContext
     {
         public DbSet<IngredientPriceModel> IngredientPrices { get; set; }
-        public DbSet<StarterPriceModel> StarterPrices { get; set; }
+        //public DbSet<StarterPriceModel> StarterPrices { get; set; }
         public DbSet<IngredientModel> Ingredients { get; set; }
         public DbSet<StarterModel> Starters { get; set; }
         public DbSet<PizzaModel> Pizzas { get; set; }
@@ -19,11 +19,11 @@ namespace FoodOrderApp.Data.DataContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<StarterPriceModel>(entity =>
-            {
-                entity.HasKey(k => k.Id);
-                entity.Property(p => p.Price).HasColumnType("decimal(4,2)");
-            });
+            //modelBuilder.Entity<StarterPriceModel>(entity =>
+            //{
+            //    entity.HasKey(k => k.Id);
+            //    entity.Property(p => p.Price).HasColumnType("decimal(4,2)");
+            //});
 
             modelBuilder.Entity<IngredientPriceModel>(entity =>
             {
@@ -40,7 +40,7 @@ namespace FoodOrderApp.Data.DataContext
             modelBuilder.Entity<StarterModel>(entity =>
             {
                 entity.HasKey(k => k.Id);
-                entity.HasMany(p => p.Prices).WithOne(s => s.Starter);
+                //entity.HasMany(p => p.Prices).WithOne(s => s.Starter);
             });
                 
 

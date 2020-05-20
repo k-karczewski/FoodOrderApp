@@ -9,7 +9,8 @@ namespace FoodOrderApp.Models.PizzaModels
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public ICollection<StarterPriceModel> Prices { get; set; }
+        public SizeEnum Size { get; set; }
+        public decimal Price { get; set; }
 
         public ICollection<PizzaModel> Pizzas { get; set; }
     }
