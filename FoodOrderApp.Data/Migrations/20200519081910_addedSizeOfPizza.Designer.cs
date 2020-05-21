@@ -3,14 +3,16 @@ using FoodOrderApp.Data.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FoodOrderApp.Data.Migrations
 {
     [DbContext(typeof(FoodOrderContext))]
-    partial class FoodOrderContextModelSnapshot : ModelSnapshot
+    [Migration("20200519081910_addedSizeOfPizza")]
+    partial class addedSizeOfPizza
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,6 +60,9 @@ namespace FoodOrderApp.Data.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
+
                     b.Property<int>("StarterId")
                         .HasColumnType("int");
 
@@ -94,6 +99,29 @@ namespace FoodOrderApp.Data.Migrations
                     b.ToTable("IngredientPrices");
                 });
 
+            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PriceModels.StarterPriceModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(4,2)");
+
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StarterId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StarterId");
+
+                    b.ToTable("StarterPrices");
+                });
+
             modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.StarterModel", b =>
                 {
                     b.Property<int>("Id")
@@ -103,12 +131,6 @@ namespace FoodOrderApp.Data.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Size")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -144,6 +166,15 @@ namespace FoodOrderApp.Data.Migrations
                     b.HasOne("FoodOrderApp.Models.PizzaModels.IngredientModel", "Ingredient")
                         .WithMany("Prices")
                         .HasForeignKey("IngredientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PriceModels.StarterPriceModel", b =>
+                {
+                    b.HasOne("FoodOrderApp.Models.PizzaModels.StarterModel", "Starter")
+                        .WithMany("Prices")
+                        .HasForeignKey("StarterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

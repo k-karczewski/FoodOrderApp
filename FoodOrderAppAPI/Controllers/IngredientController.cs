@@ -17,9 +17,9 @@ namespace FoodOrderAppAPI.Controllers
     [Route("api/[controller]/")]
     public class IngredientController : ControllerBase
     {
-        private readonly IFoodService<IngredientModel> _service;
+        private readonly IIngredientService _service;
 
-        public IngredientController(IFoodService<IngredientModel> service)
+        public IngredientController(IIngredientService service)
         {
             _service = service;
         }
@@ -39,8 +39,7 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("{id}", Name = "GetById")]
+        [HttpGet("{id}", Name="GetById")]
         public async Task<IActionResult> GetIngredientById(int id)
         {
             IServiceResult<IngredientModel> result = await _service.GetByIdAsync(id);

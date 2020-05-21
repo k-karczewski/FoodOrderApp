@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using FoodOrderApp.Data.DataContext;
 using FoodOrderApp.Data.Repositories;
+using FoodOrderApp.Data.UnitOfWork;
 using FoodOrderApp.Interfaces.Repositories;
 using FoodOrderApp.Interfaces.Services;
+using FoodOrderApp.Interfaces.UnitOfWork;
 using FoodOrderApp.Models.PizzaModels;
 using FoodOrderApp.Models.PizzaModels.PriceModels;
 using FoodOrderApp.Services;
@@ -40,7 +42,9 @@ namespace FoodOrderAppAPI
             services.AddDbContext<FoodOrderContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped(typeof(IFoodOrderRepository<>), typeof(FoodOrderRepository<>));
-            services.AddScoped<IFoodService<IngredientModel>, IngredientService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IPizzaService, PizzaService>();
+            services.AddScoped<IIngredientService, IngredientService>();
         }
 
 

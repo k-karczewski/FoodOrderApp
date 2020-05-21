@@ -13,22 +13,20 @@ namespace FoodOrderApp.Data.Repositories
 {
     public class FoodOrderRepository<TEntity> : IFoodOrderRepository<TEntity> where TEntity : class
     {
-        private readonly FoodOrderContext _context;
         private readonly DbSet<TEntity> _dbSet;
 
         public FoodOrderRepository(FoodOrderContext context)
         {
-            _context = context;
-            _dbSet = _context.Set<TEntity>();
+            _dbSet = context.Set<TEntity>();
         }
 
         public async Task<bool> CreateAsync(TEntity newObject)
         {
+            var entity = _dbSet.Attach(newObject);
             await _dbSet.AddAsync(newObject);
            
-            if (_context.Entry(newObject).State == EntityState.Added)
+            if (entity.State == EntityState.Added)
             {
-                await CommitChangesAsync();
                 return true;
             }
             else
@@ -37,15 +35,13 @@ namespace FoodOrderApp.Data.Repositories
             }
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(TEntity objectToDelete)
         {
-            TEntity objectToDelete = await GetByIdAsync(id);
 
             if (objectToDelete != null)
             {
-                _dbSet.Remove(objectToDelete);
-                await CommitChangesAsync();
-                return true;
+               _dbSet.Remove(objectToDelete);
+               return true;
             }
             else
             {
@@ -73,8 +69,7 @@ namespace FoodOrderApp.Data.Repositories
 
         public async Task<bool> UpdateAsync(TEntity editedObject)
         {
-            _context.Set<TEntity>().Update(editedObject);
-            await CommitChangesAsync();
+            _dbSet.Update(editedObject);
 
             return true; 
         }
@@ -90,11 +85,6 @@ namespace FoodOrderApp.Data.Repositories
             }
 
             return objectFromDb; 
-        }
-
-        private async Task<bool> CommitChangesAsync()
-        {
-            return await _context.SaveChangesAsync() != 0 ? true : false;
         }
     }
 }
