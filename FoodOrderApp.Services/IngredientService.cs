@@ -25,21 +25,31 @@ namespace FoodOrderApp.Services
         {
             try
             {
-                // try to add ingredient to database
-                bool result = await _repository.Ingredients.CreateAsync(newObject);
+                // check if ingredient with that name already exists in db
+                bool doesExistInDb = (await _repository.Ingredients.GetByExpressionAsync(x => x.Name == newObject.Name)).SingleOrDefault() == null ? false : true;
 
-                // if ingredient was added successfully
-                if(result == true)
-                {
-                    // save changes in database context
-                    await _repository.SaveChangesAsync();
+                if(doesExistInDb == false)
+                {    
+                    // try to add ingredient to database
+                    bool result = await _repository.Ingredients.CreateAsync(newObject);
 
-                    // return Ok service result with created object
-                    return new ServiceResult<IngredientModel>(ResultType.Created, newObject);
-                }
+                    // if ingredient was added successfully
+                    if(result == true)
+                    {
+                        // save changes in database context
+                        await _repository.SaveChangesAsync();
+
+                        // return Ok service result with created object
+                        return new ServiceResult<IngredientModel>(ResultType.Created, newObject);
+                    }
                 
-                // result equals false, throw exception that ingredient was not added
-                throw new Exception("Cannot add new ingredient");
+                    // result equals false, throw exception that ingredient was not added
+                    throw new Exception("Cannot add new ingredient");
+                }
+                else
+                {
+                    throw new Exception($"Ingredient with name {newObject.Name} already exists in database");
+                }
             }
             catch(Exception e)
             {
@@ -60,21 +70,28 @@ namespace FoodOrderApp.Services
                 // get ingredient from database
                 IngredientModel ingredientToDelete = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id == ingredientId)).SingleOrDefault();
 
-                // try to delete it
-                bool result = await _repository.Ingredients.DeleteAsync(ingredientToDelete);
-
-                // if deletion was successful
-                if (result == true)
+                if (ingredientToDelete != null)
                 {
-                    // save changes in database context
-                    await _repository.SaveChangesAsync();
+                    // try to delete it
+                    bool result = await _repository.Ingredients.DeleteAsync(ingredientToDelete);
 
-                    // return service result with Deleted status
-                    return new ServiceResult(ResultType.Deleted);
+                    // if deletion was successful
+                    if (result == true)
+                    {
+                        // save changes in database context
+                        await _repository.SaveChangesAsync();
+
+                        // return service result with Deleted status
+                        return new ServiceResult(ResultType.Deleted);
+                    }
+
+                    // if ingredient was not removed successfully throw exception with error message
+                    throw new Exception($"Cannot delete ingredient with id {ingredientId}");
                 }
-
-                // if ingredient was not removed successfully throw exception with error message
-                throw new Exception($"Cannot delete ingredient with id {ingredientId}");
+                else
+                {
+                    throw new Exception($"Ingredient with id {ingredientId} was not found in database");
+                }
             }
             catch (Exception e)
             {
@@ -163,14 +180,17 @@ namespace FoodOrderApp.Services
                         i => i.Include(p => p.PizzaIngredients).ThenInclude(p => p.Ingredient).ThenInclude(p => p.Prices).Include(s => s.Starter)))
                                                         .Where(p => p.PizzaIngredients.Any(x => x.IngredientId == ingredientId)).ToList();
 
-                    foreach(PizzaModel pizza in pizzasToUpdate)
-                    {
-                        pizza.TotalPrice = CountTotalPizzaPrice(pizza);
-                        await _repository.Pizzas.UpdateAsync(pizza);
-                    }
+                    if(pizzasToUpdate.Count > 0)
+                    {                
+                        foreach(PizzaModel pizza in pizzasToUpdate)
+                        {
+                            pizza.TotalPrice = CountTotalPizzaPrice(pizza);
+                            await _repository.Pizzas.UpdateAsync(pizza);
+                        }
 
-                    // save context changes
-                    await _repository.SaveChangesAsync();
+                        // save context changes
+                        await _repository.SaveChangesAsync();
+                    }
 
                     return new ServiceResult<IngredientModel>(ResultType.Edited, ingredientToUpdate);
                 }
