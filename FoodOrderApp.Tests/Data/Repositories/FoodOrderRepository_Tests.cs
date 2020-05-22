@@ -16,9 +16,8 @@ namespace FoodOrderApp.Tests.Data.Repositories
     [TestClass]
     public class FoodOrderRepository_Tests
     {
-        private readonly DbContextOptions _dbContextOptions = new DbContextOptionsBuilder<FoodOrderContext>().UseInMemoryDatabase(databaseName: "foodOrderDb_stub").Options;
+        private readonly DbContextOptions _dbContextOptions = new DbContextOptionsBuilder<FoodOrderContext>().UseInMemoryDatabase(databaseName: "foodOrderDb_fake").Options;
         private ICollection<IngredientModel> ingredients;
-        private readonly int _idOfObject = 1;
 
         [TestInitialize]
         public void InitializeObjects()
@@ -49,53 +48,75 @@ namespace FoodOrderApp.Tests.Data.Repositories
         }
 
         [TestMethod]
-        public void CreateObject()
+        public async Task AddObjectsToDatabase()
         {            
             using(var context = new FoodOrderContext(_dbContextOptions))
             {
                 IFoodOrderRepository<IngredientModel> repo = new FoodOrderRepository<IngredientModel>(context);
 
-                bool createResult = repo.CreateAsync(ingredients.SingleOrDefault(id => id.Id == _idOfObject)).Result;
+                bool actualCreateResult = false;
 
-                Assert.AreEqual(true, createResult);
+                foreach (var ingredient in ingredients)
+                {
+                    actualCreateResult = await repo.CreateAsync(ingredient);
+
+                    if(actualCreateResult == false)
+                    {
+                        break;
+                    }
+                }
+
+                await context.SaveChangesAsync();
+                
+                Assert.AreEqual(true, actualCreateResult);
+
+                var objectsFromRepo = (await repo.GetByExpressionAsync(x => x.Id > 0)).ToList();
+
+                Assert.AreEqual(ingredients.Count, objectsFromRepo.Count);
             }
         }
 
         [TestMethod]
-        public void DeleteObject()
+        public async Task DeleteObjectFromDatabase()
         {
             using (var context = new FoodOrderContext(_dbContextOptions))
             {
                 IFoodOrderRepository<IngredientModel> repo = new FoodOrderRepository<IngredientModel>(context);
 
-                bool deleteResult = repo.DeleteAsync(_idOfObject).Result;
+                IngredientModel ingredientToDelete = (await repo.GetByExpressionAsync(x => x.Id == ingredients.Count)).SingleOrDefault();
+
+                bool deleteResult = await repo.DeleteAsync(ingredientToDelete);
+                
+                await context.SaveChangesAsync();
 
                 Assert.AreEqual(true, deleteResult);
+
+                List<IngredientModel> remianIngredients = (await repo.GetByExpressionAsync(x => x.Id > 0)).ToList();
+                Assert.AreEqual(ingredients.Count - 1, remianIngredients.Count);
             }
         }
 
+
         [TestMethod]
-        public void GetCollectionOfObjects()
+        public async Task GetCollectionOfObjects()
         {
-            using(var context = new FoodOrderContext(_dbContextOptions))
+            using (var context = new FoodOrderContext(_dbContextOptions))
             {
                 IFoodOrderRepository<IngredientModel> repo = new FoodOrderRepository<IngredientModel>(context);
 
-                foreach (IngredientModel ingredient in ingredients)
+                var result = await repo.GetByExpressionAsync(x => x.Id > 0);
+
+                var resultsList = result.ToList();
+
+                Assert.AreEqual(ingredients.Count - 1, resultsList.Count);
+
+                for (int i = 1; i <= resultsList.Count; i++)
                 {
-                   repo.CreateAsync(ingredient);
-                }
-
-                var result = repo.GetByExpressionAsync(x => x.Id > 0, null);
-                var resultsList = result.Result.ToList();
-
-                Assert.AreEqual(ingredients.Count, resultsList.Count);
-
-                for(int i = 1; i <= resultsList.Count; i++)
-                {
-                    Assert.AreSame(ingredients.Single(x => x.Id == i), resultsList[i-1]);
+                    Assert.AreEqual(ingredients.Single(x => x.Id == i).Id, resultsList[i - 1].Id);
+                    Assert.AreEqual(ingredients.Single(x => x.Id == i).Name, resultsList[i - 1].Name);
                 }
             }
         }
+
     }
 }
