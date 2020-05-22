@@ -39,7 +39,7 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
-        [HttpGet("{id}", Name="GetById")]
+        [HttpGet("{id}", Name="GetIngedientById")]
         public async Task<IActionResult> GetIngredientById(int id)
         {
             IServiceResult<IngredientModel> result = await _service.GetByIdAsync(id);
@@ -62,7 +62,7 @@ namespace FoodOrderAppAPI.Controllers
 
             if(result.Result == ResultType.Created)
             {
-                return CreatedAtRoute("GetById", new { id = result.ReturnedObject.Id }, result.ReturnedObject);
+                return CreatedAtRoute("GetIngedientById", new { id = result.ReturnedObject.Id }, result.ReturnedObject);
             }
             else
             {
@@ -78,7 +78,7 @@ namespace FoodOrderAppAPI.Controllers
 
             if(result.Result == ResultType.Edited)
             {
-                return CreatedAtRoute("GetById", new { id = result.ReturnedObject.Id }, result.ReturnedObject);
+                return CreatedAtRoute("GetIngedientById", new { id = result.ReturnedObject.Id }, result.ReturnedObject);
             }
             else
             {

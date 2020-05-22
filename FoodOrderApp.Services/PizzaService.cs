@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace FoodOrderApp.Services
@@ -27,15 +28,15 @@ namespace FoodOrderApp.Services
                 List<PizzaToReturnDto> pizzasToReturn = new List<PizzaToReturnDto>();
 
                 // get all pizzas with all child objects
-                List<PizzaModel> pizzas = 
+                List<PizzaModel> pizzas =
                     (await _repository.Pizzas.GetByExpressionAsync(x => x.Id > 0, i => i.Include(x => x.PizzaIngredients).ThenInclude(z => z.Ingredient).
                                                       ThenInclude(p => p.Prices).Include(s => s.Starter))).ToList();
 
                 // if pizzas were found
-                if(pizzas != null && pizzas.Count > 0)
+                if (pizzas != null && pizzas.Count > 0)
                 {
-                    
-                    foreach(PizzaModel p in pizzas)
+
+                    foreach (PizzaModel p in pizzas)
                     {
                         // create dto objects for all pizzas taken from database
                         pizzasToReturn.Add(CreatePizzaToReturn(p));
@@ -47,13 +48,12 @@ namespace FoodOrderApp.Services
                 // throw exception if no pizza object was found in database
                 throw new Exception("Cannot load pizzas from database");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // catch exception and pass errors to controller
                 return new ServiceResult<List<PizzaToReturnDto>>(ResultType.Error, new List<string> { e.Message });
             }
         }
-
 
         /// <summary>
         /// Gets PizzaModel object by identifier
@@ -65,9 +65,9 @@ namespace FoodOrderApp.Services
             try
             {
                 // try to get pizza with all child objects
-                PizzaModel pizza = 
+                PizzaModel pizza =
                     (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == id, i => i.Include(x => x.PizzaIngredients).ThenInclude(z => z.Ingredient).
-                                                      ThenInclude(p => p.Prices). Include(s => s.Starter))).SingleOrDefault();
+                                                      ThenInclude(p => p.Prices).Include(s => s.Starter))).SingleOrDefault();
 
                 if (pizza != null)
                 {
@@ -78,7 +78,7 @@ namespace FoodOrderApp.Services
                 // throw exception otherwise
                 throw new Exception("Cannot load pizza from database");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // catch exception and pass errors to controller
                 return new ServiceResult<PizzaModel>(ResultType.Error, new List<string> { e.Message });
@@ -98,12 +98,12 @@ namespace FoodOrderApp.Services
                 List<PizzaModel> pizzas = (await _repository.Pizzas.GetByExpressionAsync(x => x.Name.ToLower() == name.ToLower(),
                                             i => i.Include(s => s.Starter).Include(x => x.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices))).ToList();
 
-                if(pizzas != null && pizzas.Count > 0)
+                if (pizzas != null && pizzas.Count > 0)
                 {
                     List<PizzaToReturnDto> pizzasToReturn = new List<PizzaToReturnDto>();
 
                     // convert them to objects to retun
-                    foreach(PizzaModel p in pizzas)
+                    foreach (PizzaModel p in pizzas)
                     {
                         pizzasToReturn.Add(CreatePizzaToReturn(p));
                     }
@@ -115,7 +115,7 @@ namespace FoodOrderApp.Services
                 // throw exception if pizza with this name was not found in database
                 throw new Exception($"Pizzas with name: {name} were not found");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // catch exception and pass errors to controller
                 return new ServiceResult<List<PizzaToReturnDto>>(ResultType.Error, new List<string> { e.Message });
@@ -132,9 +132,9 @@ namespace FoodOrderApp.Services
             try
             {
                 // get pizza with id value of pizzaId
-                PizzaModel pizza = 
+                PizzaModel pizza =
                     (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == pizzaId, i => i.Include(x => x.PizzaIngredients).
-                                                   ThenInclude(z => z.Ingredient).ThenInclude(p => p.Prices).Include(s => s.Starter))).SingleOrDefault();         
+                                                   ThenInclude(z => z.Ingredient).ThenInclude(p => p.Prices).Include(s => s.Starter))).SingleOrDefault();
                 // if pizza was found
                 if (pizza != null)
                 {
@@ -165,7 +165,7 @@ namespace FoodOrderApp.Services
             try
             {
                 // get pizza to delete
-                PizzaModel pizza = 
+                PizzaModel pizza =
                     (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == pizzaId, i => i.Include(x => x.PizzaIngredients).ThenInclude(z => z.Ingredient).
                                        ThenInclude(p => p.Prices).Include(s => s.Starter))).SingleOrDefault();
 
@@ -193,7 +193,7 @@ namespace FoodOrderApp.Services
             {
                 PizzaModel nameUsed = (await _repository.Pizzas.GetByExpressionAsync(x => x.Name.ToLower() == pizzaToCreate.Name.ToLower())).FirstOrDefault();
 
-                if(nameUsed == null)
+                if (nameUsed == null)
                 {
                     List<PizzaModel> createdPizzas = await CreatePizza(pizzaToCreate);
 
@@ -204,11 +204,140 @@ namespace FoodOrderApp.Services
                     throw new Exception($"Pizza name: {pizzaToCreate.Name} is already taken");
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                return new ServiceResult<List<PizzaModel>> (ResultType.Error, new List<string> { e.Message });
+                return new ServiceResult<List<PizzaModel>>(ResultType.Error, new List<string> { e.Message });
             }
         }
+
+        /// <summary>
+        /// Adds ingredient to existing pizza
+        /// </summary>
+        /// <param name="pizzaName">name of pizza that ingredient will be added for</param>
+        /// <param name="ingredientId">identifier of ingredient</param>
+        /// <returns>PizzaToReturn object or list of errors</returns>
+        public async Task<IServiceResult<List<PizzaToReturnDto>>> AddIngredientAsync(string pizzaName, int ingredientId)
+        {
+            try
+            {
+                List<PizzaModel> pizzasToUpdate = (await _repository.Pizzas.GetByExpressionAsync(x => x.Name.ToLower() == pizzaName.ToLower(),
+                                            i => i.Include(pi => pi.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).Include(s => s.Starter))).ToList();
+
+                // if pizza was found
+                if (pizzasToUpdate != null && pizzasToUpdate.Count > 0)
+                {
+                    // check if pizza already have the ingredient to be added
+                    bool isIncluded = pizzasToUpdate[0].PizzaIngredients.SingleOrDefault(x => x.IngredientId == ingredientId) == null ? false : true;
+
+                    if (isIncluded == false)
+                    {
+                        // take the ingredient from database
+                        IngredientModel ingredientToAdd = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id == ingredientId, i => i.Include(p => p.Prices))).SingleOrDefault();
+
+                        // update all sizes of pizzas
+                        foreach(PizzaModel pizzaToUpdate in pizzasToUpdate)
+                        {
+                            pizzaToUpdate.PizzaIngredients.Add(
+                                new PizzaIngredientsModel
+                                {
+                                    Ingredient = ingredientToAdd,
+                                    Pizza = pizzaToUpdate
+                                }
+                            );
+
+                            pizzaToUpdate.TotalPrice = CountTotalPizzaPrice(pizzaToUpdate);
+
+                            bool updateResult = await _repository.Pizzas.UpdateAsync(pizzaToUpdate);
+
+                            if(updateResult == false)
+                            {
+                                throw new Exception("Error during edition of pizza object");
+                            }
+                        }
+
+                        await _repository.SaveChangesAsync();
+
+                        List<PizzaToReturnDto> pizzasToReturn = new List<PizzaToReturnDto>();
+
+                        foreach(PizzaModel pizza in pizzasToUpdate)
+                        {
+                            pizzasToReturn.Add(CreatePizzaToReturn(pizza));
+                        }
+
+                        return new ServiceResult<List<PizzaToReturnDto>>(ResultType.Edited, pizzasToReturn);
+                    }
+                    else
+                    {
+                        throw new Exception($"Ingredient with id {ingredientId} is already included in pizza with name {pizzaName}");
+                    }
+                }
+                else
+                {
+                    throw new Exception($"Pizza with name {pizzaName} was not found in database");
+                }
+            }
+            catch (Exception e)
+            {
+                return new ServiceResult<List<PizzaToReturnDto>>(ResultType.Error, new List<string> { e.Message });
+            }
+        }
+
+        /// <summary>
+        /// Deletes ingredient from existing pizza
+        /// </summary>
+        /// <param name="pizzaName">name of pizza that ingredient will be removed from</param>
+        /// <param name="ingredientId">identifier of ingredient</param>
+        /// <returns>PizzaToReturn object or list of errors</returns>
+        public async Task<IServiceResult<List<PizzaToReturnDto>>> DeleteIngredientAsync(string pizzaName, int ingredientId)
+        {
+            try
+            {
+                List<PizzaModel> pizzasToUpdate = (await _repository.Pizzas.GetByExpressionAsync(x => x.Name == pizzaName, 
+                                                i => i.Include(pi => pi.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).Include(s => s.Starter))).ToList();
+
+                if(pizzasToUpdate != null && pizzasToUpdate.Count > 0)
+                {
+                    bool isIncluded = pizzasToUpdate[0].PizzaIngredients.SingleOrDefault(x => x.IngredientId == ingredientId) == null ? false : true;
+                    
+                    if(isIncluded == true)
+                    {
+                        List<PizzaToReturnDto> pizzasToReturn = new List<PizzaToReturnDto>();
+
+                        foreach(PizzaModel pizzaToUpdate in pizzasToUpdate)
+                        {
+                            pizzaToUpdate.PizzaIngredients.Remove(pizzaToUpdate.PizzaIngredients.SingleOrDefault(x => x.IngredientId == ingredientId));
+                            pizzaToUpdate.TotalPrice = CountTotalPizzaPrice(pizzaToUpdate);
+
+                            bool result = await _repository.Pizzas.UpdateAsync(pizzaToUpdate);
+
+                            if(!result)
+                            {
+                                throw new Exception($"Error during editing ingredients of pizza {pizzaName}");
+                            }
+
+                            pizzasToReturn.Add(CreatePizzaToReturn(pizzaToUpdate));
+                        }
+
+                        await _repository.SaveChangesAsync();
+
+                        return new ServiceResult<List<PizzaToReturnDto>>(ResultType.Edited, pizzasToReturn);
+                    }
+                    else
+                    {
+                        throw new Exception($"Cannot delete ingredient with id {ingredientId} from pizza {pizzaName} because it is not included in pizza {pizzaName}");
+                    }
+                }
+                else
+                {
+                    throw new Exception($"Pizza {pizzaName} was not found in database");
+                }
+            }
+            catch(Exception e)
+            {
+                return new ServiceResult<List<PizzaToReturnDto>>(ResultType.Error, new List<string> { e.Message });
+            }
+        }
+
 
         /// <summary>
         /// Creates PizzaModel object for all starters that are available in database.

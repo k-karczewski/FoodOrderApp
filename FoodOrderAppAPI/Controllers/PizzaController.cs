@@ -30,7 +30,7 @@ namespace FoodOrderAppAPI.Controllers
 
             if(result.Result == ResultType.Created)
             {
-               return CreatedAtRoute("GetByName", new { name = result.ReturnedObject[0].Name }, result.ReturnedObject);
+               return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject[0].Name }, result.ReturnedObject);
             }
             else
             {
@@ -38,8 +38,7 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
-        [HttpGet("GetByName")]
-        [Route("name/{name}")]
+        [HttpGet("name/{name}", Name = "GetPizzaByName")]
         public async Task<IActionResult> GetByName(string name)
         {
             IServiceResult<List<PizzaToReturnDto>> result = await _service.GetByName(name);
@@ -54,9 +53,7 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
-
-        [HttpGet("GetById")]
-        [Route("{id}")]
+        [HttpGet("{id}", Name = "GetPizzaById")]
         public async Task<IActionResult> GetById(int id)
         {
             IServiceResult<PizzaModel> result = await _service.GetByIdAsync(id);
@@ -83,6 +80,38 @@ namespace FoodOrderAppAPI.Controllers
             else
             {
                 return BadRequest();
+            }
+        }
+
+        [HttpPut]
+        [Route("{pizzaName}/add-ingredient/{ingredientId}")]
+        public async Task<IActionResult> AddIngredient(string pizzaName, int ingredientId)
+        {
+            IServiceResult<List<PizzaToReturnDto>> result = await _service.AddIngredientAsync(pizzaName, ingredientId);
+
+            if(result.Result == ResultType.Edited)
+            {
+                return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject[0].Name }, result.ReturnedObject);
+            }
+            else
+            {
+                return BadRequest(result.Errors);
+            }
+        }
+
+        [HttpPut]
+        [Route("{pizzaName}/delete-ingredient/{ingredientId}")]
+        public async Task<IActionResult> DeleteIngredient(string pizzaName, int ingredientId)
+        {
+            IServiceResult<List<PizzaToReturnDto>> result = await _service.DeleteIngredientAsync(pizzaName, ingredientId);
+
+            if (result.Result == ResultType.Edited)
+            {
+                return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject[0].Name }, result.ReturnedObject);
+            }
+            else
+            {
+                return BadRequest(result.Errors);
             }
         }
     }
