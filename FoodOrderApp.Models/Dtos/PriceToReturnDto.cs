@@ -3,15 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FoodOrderApp.Models.PizzaModels
+namespace FoodOrderApp.Models.Dtos
 {
-    public class StarterModel
+    public class PriceToReturnDto
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
         public SizeEnum Size { get; set; }
         public decimal Price { get; set; }
-
-        public ICollection<PizzaStarterModel> PizzaStarters { get; set; }
     }
 }

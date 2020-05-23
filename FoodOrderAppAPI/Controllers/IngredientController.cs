@@ -9,7 +9,6 @@ using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Models.PizzaModels;
 using FoodOrderApp.Models.PizzaModels.PriceModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FoodOrderAppAPI.Controllers
 {

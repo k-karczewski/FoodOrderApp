@@ -16,8 +16,9 @@ namespace FoodOrderApp.Tests.Data.Repositories
     [TestClass]
     public class FoodOrderRepository_Tests
     {
-        private readonly DbContextOptions _dbContextOptions = new DbContextOptionsBuilder<FoodOrderContext>().UseInMemoryDatabase(databaseName: "foodOrderDb_fake").Options;
+        private readonly DbContextOptions _dbContextOptions = new DbContextOptionsBuilder<FoodOrderContext>().UseInMemoryDatabase(databaseName: "foodOrderDb_stub").Options;
         private ICollection<IngredientModel> ingredients;
+        private readonly int _idOfObject = 1;
 
         [TestInitialize]
         public void InitializeObjects()
@@ -47,76 +48,54 @@ namespace FoodOrderApp.Tests.Data.Repositories
             };
         }
 
-        [TestMethod]
-        public async Task AddObjectsToDatabase()
-        {            
-            using(var context = new FoodOrderContext(_dbContextOptions))
-            {
-                IFoodOrderRepository<IngredientModel> repo = new FoodOrderRepository<IngredientModel>(context);
+        //[TestMethod]
+        //public void CreateObject()
+        //{            
+        //    using(var context = new FoodOrderContext(_dbContextOptions))
+        //    {
+        //        IFoodOrderRepository<IngredientModel> repo = new FoodOrderRepository<IngredientModel>(context);
 
-                bool actualCreateResult = false;
+        //        bool createResult = repo.CreateAsync(ingredients.SingleOrDefault(id => id.Id == _idOfObject)).Result;
 
-                foreach (var ingredient in ingredients)
-                {
-                    actualCreateResult = await repo.CreateAsync(ingredient);
+        //        Assert.AreEqual(true, createResult);
+        //    }
+        //}
 
-                    if(actualCreateResult == false)
-                    {
-                        break;
-                    }
-                }
+        //[TestMethod]
+        //public void DeleteObject()
+        //{
+        //    using (var context = new FoodOrderContext(_dbContextOptions))
+        //    {
+        //        IFoodOrderRepository<IngredientModel> repo = new FoodOrderRepository<IngredientModel>(context);
 
-                await context.SaveChangesAsync();
-                
-                Assert.AreEqual(true, actualCreateResult);
+        //        bool deleteResult = repo.DeleteAsync(_idOfObject).Result;
 
-                var objectsFromRepo = (await repo.GetByExpressionAsync(x => x.Id > 0)).ToList();
+        //        Assert.AreEqual(true, deleteResult);
+        //    }
+        //}
 
-                Assert.AreEqual(ingredients.Count, objectsFromRepo.Count);
-            }
-        }
+        //[TestMethod]
+        //public void GetCollectionOfObjects()
+        //{
+        //    using(var context = new FoodOrderContext(_dbContextOptions))
+        //    {
+        //        IFoodOrderRepository<IngredientModel> repo = new FoodOrderRepository<IngredientModel>(context);
 
-        [TestMethod]
-        public async Task DeleteObjectFromDatabase()
-        {
-            using (var context = new FoodOrderContext(_dbContextOptions))
-            {
-                IFoodOrderRepository<IngredientModel> repo = new FoodOrderRepository<IngredientModel>(context);
+        //        foreach (IngredientModel ingredient in ingredients)
+        //        {
+        //           repo.CreateAsync(ingredient);
+        //        }
 
-                IngredientModel ingredientToDelete = (await repo.GetByExpressionAsync(x => x.Id == ingredients.Count)).SingleOrDefault();
+        //        var result = repo.GetByExpressionAsync(x => x.Id > 0, null);
+        //        var resultsList = result.Result.ToList();
 
-                bool deleteResult = await repo.DeleteAsync(ingredientToDelete);
-                
-                await context.SaveChangesAsync();
+        //        Assert.AreEqual(ingredients.Count, resultsList.Count);
 
-                Assert.AreEqual(true, deleteResult);
-
-                List<IngredientModel> remianIngredients = (await repo.GetByExpressionAsync(x => x.Id > 0)).ToList();
-                Assert.AreEqual(ingredients.Count - 1, remianIngredients.Count);
-            }
-        }
-
-
-        [TestMethod]
-        public async Task GetCollectionOfObjects()
-        {
-            using (var context = new FoodOrderContext(_dbContextOptions))
-            {
-                IFoodOrderRepository<IngredientModel> repo = new FoodOrderRepository<IngredientModel>(context);
-
-                var result = await repo.GetByExpressionAsync(x => x.Id > 0);
-
-                var resultsList = result.ToList();
-
-                Assert.AreEqual(ingredients.Count - 1, resultsList.Count);
-
-                for (int i = 1; i <= resultsList.Count; i++)
-                {
-                    Assert.AreEqual(ingredients.Single(x => x.Id == i).Id, resultsList[i - 1].Id);
-                    Assert.AreEqual(ingredients.Single(x => x.Id == i).Name, resultsList[i - 1].Name);
-                }
-            }
-        }
-
+        //        for(int i = 1; i <= resultsList.Count; i++)
+        //        {
+        //            Assert.AreSame(ingredients.Single(x => x.Id == i), resultsList[i-1]);
+        //        }
+        //    }
+        //}
     }
 }
