@@ -10,7 +10,6 @@ namespace FoodOrderApp.Data.DataContext
     public class FoodOrderContext : DbContext
     {
         public DbSet<IngredientPriceModel> IngredientPrices { get; set; }
-        //public DbSet<StarterPriceModel> StarterPrices { get; set; }
         public DbSet<IngredientModel> Ingredients { get; set; }
         public DbSet<StarterModel> Starters { get; set; }
         public DbSet<PizzaModel> Pizzas { get; set; }
@@ -19,11 +18,13 @@ namespace FoodOrderApp.Data.DataContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<StarterPriceModel>(entity =>
-            //{
-            //    entity.HasKey(k => k.Id);
-            //    entity.Property(p => p.Price).HasColumnType("decimal(4,2)");
-            //});
+            modelBuilder.Entity<PizzaStarterModel>(entity =>
+            {
+                entity.HasKey(ps => new { ps.PizzaId, ps.StarterId });
+                entity.HasOne(ps => ps.Pizza).WithMany(s => s.PizzaStarters).HasForeignKey(k => k.PizzaId);
+                entity.HasOne(ps => ps.Starter).WithMany(s => s.PizzaStarters).HasForeignKey(k => k.StarterId);
+            });
+
 
             modelBuilder.Entity<IngredientPriceModel>(entity =>
             {
@@ -40,15 +41,14 @@ namespace FoodOrderApp.Data.DataContext
             modelBuilder.Entity<StarterModel>(entity =>
             {
                 entity.HasKey(k => k.Id);
-                //entity.HasMany(p => p.Prices).WithOne(s => s.Starter);
             });
                 
 
             modelBuilder.Entity<PizzaModel>(entity =>
             {
                 entity.HasKey(k => k.Id);
-                entity.HasOne(s => s.Starter).WithMany(p => p.Pizzas);
-                entity.Property(p => p.TotalPrice).HasColumnType("decimal(4,2)");
+
+                entity.HasMany(t => t.TotalPrices).WithOne(p => p.Pizza);
             });
 
             modelBuilder.Entity<PizzaIngredientsModel>(entity =>

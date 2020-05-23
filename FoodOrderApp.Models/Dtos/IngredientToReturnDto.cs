@@ -8,6 +8,6 @@ namespace FoodOrderApp.Models.Dtos
     public class IngredientToReturnDto
     {
         public string Name { get; set; }
-        public decimal Price { get; set; }
+        public ICollection<PriceToReturnDto> Prices { get; set; }
     }
 }

@@ -27,20 +27,38 @@ namespace FoodOrderApp.Services
         /// </summary>
         /// <param name="pizza">data of pizza that total price will be counted for</param>
         /// <returns>Total price of pizza (including starter and all ingredients)</returns>
-        protected decimal CountTotalPizzaPrice(PizzaModel pizza)
+        protected ICollection<PizzaPriceModel> CountTotalPizzaPrice(PizzaModel pizza)
         {
-            // get starter price
-            decimal total = pizza.Starter.Price;
-
-            // add ingredients prices
-            foreach (PizzaIngredientsModel pizzaIngredient in pizza.PizzaIngredients)
+            List<decimal> prices = new List<decimal>();
+            decimal total = 0;
+            foreach (PizzaStarterModel pizzaStarter in pizza.PizzaStarters)
             {
-                // sum all prices
-                total += pizzaIngredient.Ingredient.Prices.SingleOrDefault(p => p.Size == pizza.Starter.Size).Price;
+                // get starter price
+                total = pizzaStarter.Starter.Price;
+
+                // add ingredients prices
+                foreach (PizzaIngredientsModel pizzaIngredient in pizza.PizzaIngredients)
+                {
+                    // sum all prices
+                    total += pizzaIngredient.Ingredient.Prices.SingleOrDefault(p => p.Size == pizzaStarter.Starter.Size).Price;
+                }
+
+                prices.Add(total);
             }
 
-            // return total price
-            return total;
+            pizza.TotalPrices = new List<PizzaPriceModel>();
+
+            for(int i = 0; i < prices.Count; i++)
+            {
+                pizza.TotalPrices.Add(new PizzaPriceModel
+                {
+                    Size = (SizeEnum)i,
+                    Price = prices[i]
+                });
+            }
+
+            // return total prices
+            return pizza.TotalPrices;
         }
     }
 }

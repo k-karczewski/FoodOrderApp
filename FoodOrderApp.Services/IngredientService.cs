@@ -160,12 +160,12 @@ namespace FoodOrderApp.Services
 
                     // update price of all pizzas that include edited ingredient
                     List<PizzaModel> pizzasToUpdate = (await _repository.Pizzas.GetByExpressionAsync(x => x.Id > 0, 
-                        i => i.Include(p => p.PizzaIngredients).ThenInclude(p => p.Ingredient).ThenInclude(p => p.Prices).Include(s => s.Starter)))
+                        i => i.Include(p => p.PizzaIngredients).ThenInclude(p => p.Ingredient).ThenInclude(p => p.Prices).Include(s => s.PizzaStarters).ThenInclude(s => s.Starter)))
                                                         .Where(p => p.PizzaIngredients.Any(x => x.IngredientId == ingredientId)).ToList();
 
                     foreach(PizzaModel pizza in pizzasToUpdate)
                     {
-                        pizza.TotalPrice = CountTotalPizzaPrice(pizza);
+                        pizza.TotalPrices = CountTotalPizzaPrice(pizza);
                         await _repository.Pizzas.UpdateAsync(pizza);
                     }
 

@@ -26,11 +26,11 @@ namespace FoodOrderAppAPI.Controllers
         [Route("create")]
         public async Task<IActionResult> Create(PizzaToCreateDto pizzaToCreate)
         {
-            IServiceResult<List<PizzaModel>> result = await _service.CreateAsync(pizzaToCreate);
+            IServiceResult<PizzaToReturnDto> result = await _service.CreateAsync(pizzaToCreate);
 
             if(result.Result == ResultType.Created)
             {
-               return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject[0].Name }, result.ReturnedObject);
+               return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject.Name }, result.ReturnedObject);
             }
             else
             {
@@ -58,7 +58,7 @@ namespace FoodOrderAppAPI.Controllers
         {
             IServiceResult<PizzaModel> result = await _service.GetByIdAsync(id);
 
-            if (result.Result == ResultType.Created)
+            if (result.Result == ResultType.Correct)
             {
                 return Ok(result.ReturnedObject);
             }

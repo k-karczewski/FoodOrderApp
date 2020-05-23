@@ -27,9 +27,9 @@ namespace FoodOrderApp.Interfaces.Services
         /// <summary>
         /// Creates new pizza in database
         /// </summary>
-        /// <param name="newPizza">data of pizza to be created</param>
-        /// <returns>List of created pizzas or errors (depending on returned ServiceResult state)</returns>
-        Task<IServiceResult<List<PizzaModel>>> CreateAsync(PizzaToCreateDto newPizza);
+        /// <param name="pizzaToCreate">data of pizza to be created</param>
+        /// <returns>Created pizza or errors that occured during creation (depending on returned ServiceResult state)</returns>
+        Task<IServiceResult<PizzaToReturnDto>> CreateAsync(PizzaToCreateDto pizzaToCreate);
 
         /// <summary>
         /// Updates total price of pizza. The total price is based on stater price and included ingredients prices.
