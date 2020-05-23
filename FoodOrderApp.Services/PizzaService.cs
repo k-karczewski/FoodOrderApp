@@ -233,7 +233,9 @@ namespace FoodOrderApp.Services
             try
             {
                 List<PizzaModel> pizzasToUpdate = (await _repository.Pizzas.GetByExpressionAsync(x => x.Name.ToLower() == pizzaName.ToLower(),
-                                            i => i.Include(pi => pi.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).Include(s => s.PizzaStarters).ThenInclude(s => s.Starter))).ToList();
+                                            i => i.Include(pi => pi.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
+                                            Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
+                                            Include(tp => tp.TotalPrices))).ToList();
 
                 // if pizza was found
                 if (pizzasToUpdate != null && pizzasToUpdate.Count > 0)
@@ -305,7 +307,9 @@ namespace FoodOrderApp.Services
             try
             {
                 List<PizzaModel> pizzasToUpdate = (await _repository.Pizzas.GetByExpressionAsync(x => x.Name == pizzaName, 
-                                                i => i.Include(pi => pi.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).Include(s => s.PizzaStarters).ThenInclude(s => s.Starter))).ToList();
+                                                i => i.Include(pi => pi.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
+                                                Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
+                                                Include(tp => tp.TotalPrices))).ToList();
 
                 if(pizzasToUpdate != null && pizzasToUpdate.Count > 0)
                 {
@@ -427,9 +431,6 @@ namespace FoodOrderApp.Services
 
                 ingredientsToReturn.Add(ingredientToReturn);
             }
-
-
-            List<StarterToReturnDto> startersToReturn = new List<StarterToReturnDto>();
 
             // create object to return
             PizzaToReturnDto pizzaToReturn = new PizzaToReturnDto
