@@ -166,7 +166,7 @@ namespace FoodOrderApp.Services
                 // get price that will be updated
                 IngredientPriceModel priceToUpdate = ingredientToUpdate.Prices.SingleOrDefault(x => x.Size == price.Size);
 
-                if(priceToUpdate != null)
+                if (priceToUpdate != null)
                 {
                     // update price
                     priceToUpdate.Price = price.Price;
@@ -183,7 +183,7 @@ namespace FoodOrderApp.Services
                     {
                         foreach (PizzaModel pizza in pizzasToUpdate)
                         {
-                            pizza.TotalPrice = CountTotalPizzaPrice(pizza);
+                            pizza.TotalPrices = CountTotalPizzaPrice(pizza);
                             await _repository.Pizzas.UpdateAsync(pizza);
                         }
 
