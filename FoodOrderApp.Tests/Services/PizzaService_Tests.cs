@@ -4,11 +4,12 @@ using FoodOrderApp.Interfaces.UnitOfWork;
 using FoodOrderApp.Models.Dtos;
 using FoodOrderApp.Models.PizzaModels;
 using FoodOrderApp.Models.PizzaModels.PriceModels;
-//using FoodOrderApp.Services;
-//using FoodOrderApp.Tests._Fakes.Data;
+using FoodOrderApp.Services;
+using FoodOrderApp.Tests._Fakes.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,13 +25,14 @@ namespace FoodOrderApp.Tests.Services
 
         public PizzaService_Tests()
         {
-  //          _unitOfWorkFake = new UnitOfWork_Fake();
-  //          _service = new PizzaService(_unitOfWorkFake);
+            _unitOfWorkFake = new UnitOfWork_Fake();
+            _service = new PizzaService(_unitOfWorkFake);
         }
 
         [TestInitialize]
         public void Initialize()
         {
+            // create repository seed
             List<IngredientModel> ingredients = new List<IngredientModel>
             {
                 new IngredientModel
@@ -99,11 +101,40 @@ namespace FoodOrderApp.Tests.Services
                 },
             };
 
+            List<StarterModel> starters = new List<StarterModel>
+            {
+                new StarterModel
+                {
+                    Id = 2,
+                    Size = SizeEnum.Small,
+                    Name = "Name1",
+                    Price = 10.00M
+                },
+                new StarterModel
+                {
+                    Id = 2,
+                    Size = SizeEnum.Medium,
+                    Name = "Name2",
+                    Price = 14.00M
+                }
+            };
+
             pizzaToCreate = new PizzaToCreateDto
             {
                 Name = "TestPizza",
                 IngredientIds = new List<int> { 1, 2 },
             };
+
+            // initialize repository with objects
+            foreach(IngredientModel ingredient in ingredients)
+            {
+                _unitOfWorkFake.Ingredients.CreateAsync(ingredient);
+            }
+
+            foreach(StarterModel starter in starters)
+            {
+                _unitOfWorkFake.Starters.CreateAsync(starter);
+            }
         }
 
         [TestMethod]
@@ -112,25 +143,20 @@ namespace FoodOrderApp.Tests.Services
             IServiceResult<PizzaToReturnDto> result = await _service.CreateAsync(pizzaToCreate);
 
             Assert.AreEqual(ResultType.Created, result.Result);
+            Assert.AreEqual(2, result.ReturnedObject.TotalPrices.Count);
+            Assert.AreEqual(2, result.ReturnedObject.Ingredients.Count);
         }
 
         [TestMethod]
-        public async Task CreatePizzaWithExistingName()
+        public async Task CreateWithTakenName()
         {
             await _service.CreateAsync(pizzaToCreate);
-
             IServiceResult<PizzaToReturnDto> result = await _service.CreateAsync(pizzaToCreate);
 
             Assert.AreEqual(ResultType.Error, result.Result);
             Assert.AreEqual(1, result.Errors.Count);
+            Assert.AreEqual("Pizza name: TestPizza is already taken", result.Errors.ElementAt(0));
         }
-
-        //[TestMethod]
-        //public async Task GetAllPizzas()
-        //{
-
-        //}
-
 
     }
 }

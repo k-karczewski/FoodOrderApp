@@ -102,6 +102,7 @@ namespace FoodOrderApp.Tests.Services
 
             Assert.AreEqual(ResultType.Error, result.Result);
             Assert.AreEqual(1, result.Errors.Count);
+            Assert.AreEqual($"Object with id: {Id-1000} has not been found", result.Errors.ElementAt(0));
         }
 
         [TestMethod]
