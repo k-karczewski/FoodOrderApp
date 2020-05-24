@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace FoodOrderApp.Services
@@ -19,9 +18,9 @@ namespace FoodOrderApp.Services
         public PizzaService(IUnitOfWork repository) : base(repository) { }
 
         /// <summary>
-        /// Gets all pizzas from database including ingredients, their prices and starter
+        /// Gets all pizzas from database including ingredients, their prices and starters
         /// </summary>
-        /// <returns>List of pizza data or list of errors</returns>
+        /// <returns>List of pizza to return data or list of errors</returns>
         public async Task<IServiceResult<List<PizzaToReturnDto>>> GetAsync()
         {
             try
@@ -30,7 +29,7 @@ namespace FoodOrderApp.Services
 
                 // get all pizzas with all child objects
                 List<PizzaModel> pizzas =
-                    (await _repository.Pizzas.GetByExpressionAsync(x => x.Id > 0, 
+                    (await _repository.Pizzas.GetByExpressionAsync(x => x.Id > 0,
                                                    i => i.Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
                                                    Include(x => x.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
                                                    Include(tp => tp.TotalPrices))).ToList();
@@ -69,7 +68,7 @@ namespace FoodOrderApp.Services
             {
                 // try to get pizza with all child objects
                 PizzaModel pizza =
-                    (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == id, 
+                    (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == id,
                                                     i => i.Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
                                                     Include(x => x.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
                                                     Include(tp => tp.TotalPrices))).SingleOrDefault();
@@ -100,10 +99,7 @@ namespace FoodOrderApp.Services
             try
             {
                 // get pizzas that have name equal parameter value
-                List<PizzaModel> pizzas = (await _repository.Pizzas.GetByExpressionAsync(x => x.Name.ToLower() == name.ToLower(),
-                                            i => i.Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
-                                                   Include(x => x.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
-                                                   Include(tp => tp.TotalPrices))).ToList();
+                List<PizzaModel> pizzas = await GetPizzasByName(name);
 
                 if (pizzas != null && pizzas.Count > 0)
                 {
@@ -139,9 +135,7 @@ namespace FoodOrderApp.Services
             try
             {
                 // get pizza with id value of pizzaId
-                PizzaModel pizza =
-                    (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == pizzaId, i => i.Include(x => x.PizzaIngredients).
-                                                   ThenInclude(z => z.Ingredient).ThenInclude(p => p.Prices).Include(s => s.PizzaStarters).ThenInclude(s => s.Starter))).SingleOrDefault();
+                PizzaModel pizza = await GetPizzaById(pizzaId);
                 // if pizza was found
                 if (pizza != null)
                 {
@@ -172,9 +166,7 @@ namespace FoodOrderApp.Services
             try
             {
                 // get pizza to delete
-                PizzaModel pizza =
-                    (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == pizzaId, i => i.Include(x => x.PizzaIngredients).ThenInclude(z => z.Ingredient).
-                                       ThenInclude(p => p.Prices).Include(s => s.PizzaStarters).ThenInclude(s => s.Starter))).SingleOrDefault();
+                PizzaModel pizza = await GetPizzaById(pizzaId);
 
                 if (pizza != null)
                 {
@@ -197,12 +189,12 @@ namespace FoodOrderApp.Services
         /// Creates new pizza in database
         /// </summary>
         /// <param name="pizzaToCreate">data of pizza to be created</param>
-        /// <returns>Created pizza or errors that occured during creation (depending on returned ServiceResult state)</returns
+        /// <returns>Pizza data to return or errors that occured during creation (depending on returned ServiceResult state)</returns
         public async Task<IServiceResult<PizzaToReturnDto>> CreateAsync(PizzaToCreateDto pizzaToCreate)
         {
             try
             {
-                PizzaModel nameUsed = (await _repository.Pizzas.GetByExpressionAsync(x => x.Name.ToLower() == pizzaToCreate.Name.ToLower())).FirstOrDefault();
+                PizzaModel nameUsed = (await GetPizzasByName(pizzaToCreate.Name)).FirstOrDefault();
 
                 if (nameUsed == null)
                 {
@@ -232,10 +224,7 @@ namespace FoodOrderApp.Services
         {
             try
             {
-                List<PizzaModel> pizzasToUpdate = (await _repository.Pizzas.GetByExpressionAsync(x => x.Name.ToLower() == pizzaName.ToLower(),
-                                            i => i.Include(pi => pi.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
-                                            Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
-                                            Include(tp => tp.TotalPrices))).ToList();
+                List<PizzaModel> pizzasToUpdate = await GetPizzasByName(pizzaName);
 
                 // if pizza was found
                 if (pizzasToUpdate != null && pizzasToUpdate.Count > 0)
@@ -249,7 +238,7 @@ namespace FoodOrderApp.Services
                         IngredientModel ingredientToAdd = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id == ingredientId, i => i.Include(p => p.Prices))).SingleOrDefault();
 
                         // update all sizes of pizzas
-                        foreach(PizzaModel pizzaToUpdate in pizzasToUpdate)
+                        foreach (PizzaModel pizzaToUpdate in pizzasToUpdate)
                         {
                             pizzaToUpdate.PizzaIngredients.Add(
                                 new PizzaIngredientsModel
@@ -263,7 +252,7 @@ namespace FoodOrderApp.Services
 
                             bool updateResult = await _repository.Pizzas.UpdateAsync(pizzaToUpdate);
 
-                            if(updateResult == false)
+                            if (updateResult == false)
                             {
                                 throw new Exception("Error during edition of pizza object");
                             }
@@ -273,7 +262,7 @@ namespace FoodOrderApp.Services
 
                         List<PizzaToReturnDto> pizzasToReturn = new List<PizzaToReturnDto>();
 
-                        foreach(PizzaModel pizza in pizzasToUpdate)
+                        foreach (PizzaModel pizza in pizzasToUpdate)
                         {
                             pizzasToReturn.Add(CreatePizzaToReturn(pizza));
                         }
@@ -306,27 +295,24 @@ namespace FoodOrderApp.Services
         {
             try
             {
-                List<PizzaModel> pizzasToUpdate = (await _repository.Pizzas.GetByExpressionAsync(x => x.Name == pizzaName, 
-                                                i => i.Include(pi => pi.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
-                                                Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
-                                                Include(tp => tp.TotalPrices))).ToList();
+                List<PizzaModel> pizzasToUpdate = await GetPizzasByName(pizzaName);
 
-                if(pizzasToUpdate != null && pizzasToUpdate.Count > 0)
+                if (pizzasToUpdate != null && pizzasToUpdate.Count > 0)
                 {
                     bool isIncluded = pizzasToUpdate[0].PizzaIngredients.SingleOrDefault(x => x.IngredientId == ingredientId) == null ? false : true;
-                    
-                    if(isIncluded == true)
+
+                    if (isIncluded == true)
                     {
                         List<PizzaToReturnDto> pizzasToReturn = new List<PizzaToReturnDto>();
 
-                        foreach(PizzaModel pizzaToUpdate in pizzasToUpdate)
+                        foreach (PizzaModel pizzaToUpdate in pizzasToUpdate)
                         {
                             pizzaToUpdate.PizzaIngredients.Remove(pizzaToUpdate.PizzaIngredients.SingleOrDefault(x => x.IngredientId == ingredientId));
                             pizzaToUpdate.TotalPrices = CountTotalPizzaPrice(pizzaToUpdate);
 
                             bool result = await _repository.Pizzas.UpdateAsync(pizzaToUpdate);
 
-                            if(!result)
+                            if (!result)
                             {
                                 throw new Exception($"Error during editing ingredients of pizza {pizzaName}");
                             }
@@ -348,7 +334,7 @@ namespace FoodOrderApp.Services
                     throw new Exception($"Pizza {pizzaName} was not found in database");
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return new ServiceResult<List<PizzaToReturnDto>>(ResultType.Error, new List<string> { e.Message });
             }
@@ -420,10 +406,10 @@ namespace FoodOrderApp.Services
                     Prices = new List<PriceToReturnDto>()
                 };
 
-                foreach(IngredientPriceModel p in i.Ingredient.Prices)
+                foreach (IngredientPriceModel p in i.Ingredient.Prices)
                 {
                     ingredientToReturn.Prices.Add(new PriceToReturnDto
-                    { 
+                    {
                         Size = p.Size,
                         Price = p.Price
                     });
@@ -453,6 +439,11 @@ namespace FoodOrderApp.Services
             return pizzaToReturn;
         }
 
+        /// <summary>
+        /// Convers StarterModel objects to PizzaStarterModel objects
+        /// </summary>
+        /// <param name="starters">collection of StarterModel objects</param>
+        /// <returns>Collection of PizzaStarterModel objects</returns>
         private ICollection<PizzaStarterModel> CreatePizzaStarters(ICollection<StarterModel> starters)
         {
             List<PizzaStarterModel> pizzaStarters = new List<PizzaStarterModel>();
@@ -468,6 +459,32 @@ namespace FoodOrderApp.Services
             }
 
             return pizzaStarters;
+        }
+
+        /// <summary>
+        /// Gets from repository all pizzas with name passed by parameter
+        /// </summary>
+        /// <param name="name">value of name</param>
+        /// <returns>List of pizzas that matches the name</returns>
+        private async Task<List<PizzaModel>> GetPizzasByName(string name)
+        {
+            return (await _repository.Pizzas.GetByExpressionAsync(x => x.Name.ToLower() == name.ToLower(),
+                                                i => i.Include(pi => pi.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
+                                                Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
+                                                Include(tp => tp.TotalPrices))).ToList();
+        }
+
+        /// <summary>
+        /// Gets pizza from repository with id passed by parameter
+        /// </summary>
+        /// <param name="id">value of id</param>
+        /// <returns>Pizza model that matches the id</returns>
+        private async Task<PizzaModel> GetPizzaById(int id)
+        {
+            return (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == id,
+                                                    i => i.Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
+                                                    Include(x => x.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
+                                                    Include(tp => tp.TotalPrices))).SingleOrDefault();
         }
     }
 }
