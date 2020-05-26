@@ -22,7 +22,7 @@ namespace FoodOrderApp.Interfaces.Services
         /// </summary>
         /// <param name="name">name of pizza</param>
         /// <returns>Pizza to return object with specific name</returns>
-        Task<IServiceResult<PizzaToReturnDto>> GetByName(string name);
+        Task<IServiceResult<PizzaToReturnDto>> GetByNameAsync(string name);
 
         /// <summary>
         /// Creates new pizza in database

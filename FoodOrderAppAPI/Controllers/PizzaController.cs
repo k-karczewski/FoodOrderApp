@@ -22,8 +22,7 @@ namespace FoodOrderAppAPI.Controllers
             _service = service;
         }
 
-        [HttpPost]
-        [Route("create")]
+        [HttpPost("create")]
         public async Task<IActionResult> Create(PizzaToCreateDto pizzaToCreate)
         {
             IServiceResult<PizzaToReturnDto> result = await _service.CreateAsync(pizzaToCreate);
@@ -41,7 +40,7 @@ namespace FoodOrderAppAPI.Controllers
         [HttpGet("name/{name}", Name = "GetPizzaByName")]
         public async Task<IActionResult> GetByName(string name)
         {
-            IServiceResult<PizzaToReturnDto> result = await _service.GetByName(name);
+            IServiceResult<PizzaToReturnDto> result = await _service.GetByNameAsync(name);
 
             if (result.Result == ResultType.Correct)
             {
@@ -83,8 +82,7 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
-        [HttpPut]
-        [Route("{pizzaName}/add-ingredient/{ingredientId}")]
+        [HttpPut("{pizzaName}/add-ingredient/{ingredientId}")]
         public async Task<IActionResult> AddIngredient(string pizzaName, int ingredientId)
         {
             IServiceResult<PizzaToReturnDto> result = await _service.AddIngredientAsync(pizzaName, ingredientId);
@@ -99,8 +97,7 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
-        [HttpPut]
-        [Route("{pizzaName}/delete-ingredient/{ingredientId}")]
+        [HttpPut("{pizzaName}/delete-ingredient/{ingredientId}")]
         public async Task<IActionResult> DeleteIngredient(string pizzaName, int ingredientId)
         {
             IServiceResult<PizzaToReturnDto> result = await _service.DeleteIngredientAsync(pizzaName, ingredientId);

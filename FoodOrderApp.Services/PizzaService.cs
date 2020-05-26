@@ -67,11 +67,7 @@ namespace FoodOrderApp.Services
             try
             {
                 // try to get pizza with all child objects
-                PizzaModel pizza =
-                    (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == id,
-                                                    i => i.Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
-                                                    Include(x => x.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
-                                                    Include(tp => tp.TotalPrices))).SingleOrDefault();
+                PizzaModel pizza = await GetPizzaById(id);
 
                 if (pizza != null)
                 {
@@ -94,7 +90,7 @@ namespace FoodOrderApp.Services
         /// </summary>
         /// <param name="name">name of pizza</param>
         /// <returns>Pizza to return object with specific name</returns>
-        public async Task<IServiceResult<PizzaToReturnDto>> GetByName(string name)
+        public async Task<IServiceResult<PizzaToReturnDto>> GetByNameAsync(string name)
         {
             try
             {
