@@ -163,23 +163,23 @@ namespace FoodOrderApp.Tests.Services
             Assert.AreEqual($"Pizza name: {pizzaToCreate.Name} is already taken", result.Errors.ElementAt(0));
         }
 
-        //[TestMethod]
-        //public async Task GetAllPizzas()
-        //{
-        //    IServiceResult<List<PizzaToReturnDto>> result = await _service.GetAsync();
+        [TestMethod]
+        public async Task GetAllPizzas()
+        {
+            IServiceResult<List<PizzaToReturnDto>> result = await _service.GetAsync();
 
-        //    Assert.AreEqual(ResultType.Correct, result.Result);
-        //    Assert.AreEqual(pizzaToCreate.Name, result.ReturnedObject.First().Name);
-        //}
+            Assert.AreEqual(ResultType.Correct, result.Result);
+            Assert.AreEqual(pizzaToCreate.Name, result.ReturnedObject.First().Name);
+        }
 
-        //[TestMethod]
-        //public async Task GetPizzaByName()
-        //{
-        //    IServiceResult<PizzaToReturnDto> result = await _service.GetByName(pizzaToCreate.Name);
+        [TestMethod]
+        public async Task GetPizzaByName()
+        {
+            IServiceResult<PizzaToReturnDto> result = await _service.GetByName(pizzaToCreate.Name);
 
-        //    Assert.AreEqual(ResultType.Correct, result.Result);
-        //    Assert.IsNotNull(result.ReturnedObject);
-        //}
+            Assert.AreEqual(ResultType.Correct, result.Result);
+            Assert.IsNotNull(result.ReturnedObject);
+        }
 
     }
 }
