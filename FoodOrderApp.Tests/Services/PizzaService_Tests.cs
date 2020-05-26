@@ -30,7 +30,7 @@ namespace FoodOrderApp.Tests.Services
         }
 
         [TestInitialize]
-        public void Initialize()
+        public async Task Initialize()
         {
             // create repository seed
             List<IngredientModel> ingredients = new List<IngredientModel>
@@ -128,18 +128,22 @@ namespace FoodOrderApp.Tests.Services
             // initialize repository with objects
             foreach(IngredientModel ingredient in ingredients)
             {
-                _unitOfWorkFake.Ingredients.CreateAsync(ingredient);
+                await _unitOfWorkFake.Ingredients.CreateAsync(ingredient);
             }
 
             foreach(StarterModel starter in starters)
             {
-                _unitOfWorkFake.Starters.CreateAsync(starter);
+                await _unitOfWorkFake.Starters.CreateAsync(starter);
             }
+
+            await _service.CreateAsync(pizzaToCreate);
         }
+
 
         [TestMethod]
         public async Task CreatePizzaCorrectly()
         {
+            pizzaToCreate.Name = "CorrectlyCreatedPizza";
             IServiceResult<PizzaToReturnDto> result = await _service.CreateAsync(pizzaToCreate);
 
             Assert.AreEqual(ResultType.Created, result.Result);
@@ -150,13 +154,32 @@ namespace FoodOrderApp.Tests.Services
         [TestMethod]
         public async Task CreateWithTakenName()
         {
+            pizzaToCreate.Name = "IncorrectlyCreatedPizza";
             await _service.CreateAsync(pizzaToCreate);
             IServiceResult<PizzaToReturnDto> result = await _service.CreateAsync(pizzaToCreate);
 
             Assert.AreEqual(ResultType.Error, result.Result);
             Assert.AreEqual(1, result.Errors.Count);
-            Assert.AreEqual("Pizza name: TestPizza is already taken", result.Errors.ElementAt(0));
+            Assert.AreEqual($"Pizza name: {pizzaToCreate.Name} is already taken", result.Errors.ElementAt(0));
         }
+
+        //[TestMethod]
+        //public async Task GetAllPizzas()
+        //{
+        //    IServiceResult<List<PizzaToReturnDto>> result = await _service.GetAsync();
+
+        //    Assert.AreEqual(ResultType.Correct, result.Result);
+        //    Assert.AreEqual(pizzaToCreate.Name, result.ReturnedObject.First().Name);
+        //}
+
+        //[TestMethod]
+        //public async Task GetPizzaByName()
+        //{
+        //    IServiceResult<PizzaToReturnDto> result = await _service.GetByName(pizzaToCreate.Name);
+
+        //    Assert.AreEqual(ResultType.Correct, result.Result);
+        //    Assert.IsNotNull(result.ReturnedObject);
+        //}
 
     }
 }
