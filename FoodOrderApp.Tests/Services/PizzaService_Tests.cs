@@ -175,7 +175,7 @@ namespace FoodOrderApp.Tests.Services
         [TestMethod]
         public async Task GetPizzaByName()
         {
-            IServiceResult<PizzaToReturnDto> result = await _service.GetByName(pizzaToCreate.Name);
+            IServiceResult<PizzaToReturnDto> result = await _service.GetByNameAsync(pizzaToCreate.Name);
 
             Assert.AreEqual(ResultType.Correct, result.Result);
             Assert.IsNotNull(result.ReturnedObject);
