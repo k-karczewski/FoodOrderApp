@@ -18,11 +18,11 @@ namespace FoodOrderApp.Interfaces.Services
         Task<IServiceResult<List<PizzaToReturnDto>>> GetAsync();
 
         /// <summary>
-        /// Gets all pizzas with name passed by parameter
+        /// Pizza stored with name passed by parameter
         /// </summary>
         /// <param name="name">name of pizza</param>
-        /// <returns>List of pizzas with specific name</returns>
-        Task<IServiceResult<List<PizzaToReturnDto>>> GetByName(string name);
+        /// <returns>Pizza to return object with specific name</returns>
+        Task<IServiceResult<PizzaToReturnDto>> GetByName(string name);
 
         /// <summary>
         /// Creates new pizza in database
@@ -44,7 +44,7 @@ namespace FoodOrderApp.Interfaces.Services
         /// <param name="pizzaName">name of pizza that ingredient will be added for</param>
         /// <param name="ingredientId">identifier of ingredient</param>
         /// <returns>PizzaToReturn object or list of errors</returns>
-        Task<IServiceResult<List<PizzaToReturnDto>>> AddIngredientAsync(string pizzaName, int ingredientId);
+        Task<IServiceResult<PizzaToReturnDto>> AddIngredientAsync(string pizzaName, int ingredientId);
 
         /// <summary>
         /// Deletes ingredient from existing pizza
@@ -52,6 +52,6 @@ namespace FoodOrderApp.Interfaces.Services
         /// <param name="pizzaName">name of pizza that ingredient will be removed from</param>
         /// <param name="ingredientId">identifier of ingredient</param>
         /// <returns>PizzaToReturn object or list of errors</returns>
-        Task<IServiceResult<List<PizzaToReturnDto>>> DeleteIngredientAsync(string pizzaName, int ingredientId);
+        Task<IServiceResult<PizzaToReturnDto>> DeleteIngredientAsync(string pizzaName, int ingredientId);
     }
 }
