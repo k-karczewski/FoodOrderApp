@@ -28,9 +28,9 @@ namespace FoodOrderAppAPI.Controllers
         {
             IServiceResult<PizzaToReturnDto> result = await _service.CreateAsync(pizzaToCreate);
 
-            if(result.Result == ResultType.Created)
+            if (result.Result == ResultType.Created)
             {
-               return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject.Name }, result.ReturnedObject);
+                return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject.Name }, result.ReturnedObject);
             }
             else
             {
@@ -41,9 +41,9 @@ namespace FoodOrderAppAPI.Controllers
         [HttpGet("name/{name}", Name = "GetPizzaByName")]
         public async Task<IActionResult> GetByName(string name)
         {
-            IServiceResult<List<PizzaToReturnDto>> result = await _service.GetByName(name);
+            IServiceResult<PizzaToReturnDto> result = await _service.GetByName(name);
 
-            if(result.Result == ResultType.Correct)
+            if (result.Result == ResultType.Correct)
             {
                 return Ok(result.ReturnedObject);
             }
@@ -87,11 +87,11 @@ namespace FoodOrderAppAPI.Controllers
         [Route("{pizzaName}/add-ingredient/{ingredientId}")]
         public async Task<IActionResult> AddIngredient(string pizzaName, int ingredientId)
         {
-            IServiceResult<List<PizzaToReturnDto>> result = await _service.AddIngredientAsync(pizzaName, ingredientId);
+            IServiceResult<PizzaToReturnDto> result = await _service.AddIngredientAsync(pizzaName, ingredientId);
 
-            if(result.Result == ResultType.Edited)
+            if (result.Result == ResultType.Edited)
             {
-                return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject[0].Name }, result.ReturnedObject);
+                return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject.Name }, result.ReturnedObject);
             }
             else
             {
@@ -103,11 +103,11 @@ namespace FoodOrderAppAPI.Controllers
         [Route("{pizzaName}/delete-ingredient/{ingredientId}")]
         public async Task<IActionResult> DeleteIngredient(string pizzaName, int ingredientId)
         {
-            IServiceResult<List<PizzaToReturnDto>> result = await _service.DeleteIngredientAsync(pizzaName, ingredientId);
+            IServiceResult<PizzaToReturnDto> result = await _service.DeleteIngredientAsync(pizzaName, ingredientId);
 
             if (result.Result == ResultType.Edited)
             {
-                return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject[0].Name }, result.ReturnedObject);
+                return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject.Name }, result.ReturnedObject);
             }
             else
             {
