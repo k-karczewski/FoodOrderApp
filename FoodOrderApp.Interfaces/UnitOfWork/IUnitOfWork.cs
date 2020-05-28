@@ -1,5 +1,6 @@
 ﻿using FoodOrderApp.Interfaces.Repositories;
 using FoodOrderApp.Models.PizzaModels;
+using FoodOrderApp.Models.UserModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,6 +13,7 @@ namespace FoodOrderApp.Interfaces.UnitOfWork
          IFoodOrderRepository<IngredientModel> Ingredients { get; }
          IFoodOrderRepository<PizzaModel> Pizzas { get; }
          IFoodOrderRepository<StarterModel> Starters { get; }
+         IFoodOrderRepository<UserModel> Users { get; }
 
          Task SaveChangesAsync();
     }

@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 
 namespace FoodOrderApp.Interfaces.Services
 {
-    public interface ISignUpService
+    public interface IAuthService
     {
+        Task<IServiceResult<ICollection<string>>> GetUsersNames();
+        Task<IServiceResult<string>> LoginAsync(UserToLoginDto userToLogin);
         Task<IServiceResult<UserModel>> RegisterAsync(UserToRegisterDto userToCreate);
     }
 }

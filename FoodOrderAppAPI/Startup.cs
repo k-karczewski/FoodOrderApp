@@ -49,7 +49,7 @@ namespace FoodOrderAppAPI
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPizzaService, PizzaService>();
             services.AddScoped<IIngredientService, IngredientService>();
-            services.AddScoped<ISignUpService, SignUpService>();
+            services.AddScoped<IAuthService, AuthService>();
 
             IdentityBuilder identityBuilder = services.AddIdentityCore<UserModel>(options => {
                 options.Password.RequireDigit = false;
@@ -61,6 +61,25 @@ namespace FoodOrderAppAPI
             identityBuilder = new IdentityBuilder(identityBuilder.UserType, typeof(IdentityRole<int>), identityBuilder.Services);
             identityBuilder.AddEntityFrameworkStores<FoodOrderContext>();
             identityBuilder.AddUserManager<UserManager<UserModel>>();
+            identityBuilder.AddSignInManager<SignInManager<UserModel>>();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("AuthKeys:DefaultKey").Value)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
         }
 
 
@@ -76,6 +95,7 @@ namespace FoodOrderAppAPI
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
