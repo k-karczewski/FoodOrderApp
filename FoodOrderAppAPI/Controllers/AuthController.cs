@@ -36,7 +36,7 @@ namespace FoodOrderAppAPI.Controllers
         {
             if(ModelState.IsValid)
             {
-                IServiceResult<UserModel> registerResult = await _authService.RegisterAsync(userToRegister);
+                IServiceResult<UserModel> registerResult = await _authService.RegisterAsync(userToRegister, Url);
 
                 if(registerResult.Result == ResultType.Created)
                 {
@@ -74,6 +74,20 @@ namespace FoodOrderAppAPI.Controllers
             {
                 return BadRequest(ModelState.Values);
             }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail(int userId, string token)
+        {
+            IServiceResult confirmationResult = await _authService.ConfirmEmailAsync(userId, token);
+
+            if(confirmationResult.Result == ResultType.Correct)
+            {
+                return Ok();
+            }
+
+            return BadRequest(confirmationResult.Errors);
         }
 
     }

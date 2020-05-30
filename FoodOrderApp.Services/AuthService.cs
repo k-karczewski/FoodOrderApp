@@ -7,12 +7,16 @@ using FoodOrderApp.Models.UserModels;
 using FoodOrderApp.Providers;
 using FoodOrderApp.Services.ServiceResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace FoodOrderApp.Services
 {
@@ -85,29 +89,94 @@ namespace FoodOrderApp.Services
         /// </summary>
         /// <param name="userToRegister">Correct user data from registration form - model state has been checked in controller layer</param>
         /// <returns>Service result statuses: Created or Error</returns>
-        public async Task<IServiceResult<UserModel>> RegisterAsync(UserToRegisterDto userToRegister)
+        public async Task<IServiceResult<UserModel>> RegisterAsync(UserToRegisterDto userToRegister, IUrlHelper url)
         {
-            UserModel user = new UserModel
+            try
             {
-                UserName = userToRegister.Username,
-                Email = userToRegister.EmailAddress
-            };
+                UserModel user = new UserModel
+                {
+                    UserName = userToRegister.Username,
+                    Email = userToRegister.EmailAddress
+                };
 
-            IdentityResult result = await _userManager.CreateAsync(user, userToRegister.Password);
 
-            if(result.Succeeded)
-            {
-                return new ServiceResult<UserModel>(ResultType.Created, user);
+                IdentityResult result = await _userManager.CreateAsync(user, userToRegister.Password);
+
+                if(result.Succeeded)
+                {
+                    // generate email confirmation token
+                    string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                    // convert the token from UTF8 to bytes and then to URL
+                    confirmationToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(confirmationToken));
+
+                    var values = new { userId = user.Id, token = confirmationToken };
+
+                    string urlLink = url.Action("ConfirmEmail", "Auth", new { userId = user.Id, token = confirmationToken }, "https");
+
+                    urlLink = HtmlEncoder.Default.Encode(urlLink);
+
+                    using (IEmailSender emailSender = new EmailSender(_configuration))
+                    {
+                        await emailSender.SendAccountConfirmation(user, urlLink);
+                    }
+                                 
+                    return new ServiceResult<UserModel>(ResultType.Created, user);
+                }
+
+                List<string> errors = new List<string>();
+
+                foreach (IdentityError identityError in result.Errors)
+                {
+                    errors.Add(identityError.Description);
+                }
+
+                return new ServiceResult<UserModel>(ResultType.Error, errors);
+
             }
-
-            List<string> errors = new List<string>();
-
-            foreach(IdentityError identityError in result.Errors)
+            catch(Exception e)
             {
-                errors.Add(identityError.Description);
-            }
+                UserModel registeredUser = (await _unitOfWork.Users.GetByExpressionAsync(x => x.UserName.ToLower() == userToRegister.Username.ToLower())).SingleOrDefault();
 
-            return new ServiceResult<UserModel>(ResultType.Error, errors);
+                if (registeredUser != null)
+                {
+                    await _userManager.DeleteAsync(registeredUser);
+                }
+
+                return new ServiceResult<UserModel>(ResultType.Error, new List<string> { e.Message });
+            }
+        }
+
+        /// <summary>
+        /// Confirms user's email address when generated url was clicked
+        /// </summary>
+        /// <param name="userId">identifier of user</param>
+        /// <param name="confirmationToken">confirmation token sent with confirmation url</param>
+        /// <returns>Result status of Correct or Error</returns>
+        public async Task<IServiceResult> ConfirmEmailAsync(int userId, string confirmationToken)
+        {
+            try
+            {
+                UserModel userToBeConfirmed = (await _unitOfWork.Users.GetByExpressionAsync(x => x.Id == userId)).SingleOrDefault();
+
+                if(userToBeConfirmed != null)
+                {
+                    string decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(confirmationToken));
+
+                    IdentityResult confirmationResult = await _userManager.ConfirmEmailAsync(userToBeConfirmed, decodedToken);
+
+                    if(confirmationResult.Succeeded)
+                    {
+                        return new ServiceResult(ResultType.Correct);
+                    }
+                }
+
+                throw new Exception("Error during email confirmation");
+            }
+            catch(Exception e)
+            {
+                return new ServiceResult(ResultType.Error, new List<string> { e.Message });
+            }
         }
     }
 }

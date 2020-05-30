@@ -59,7 +59,7 @@ namespace FoodOrderAppAPI
             });
 
             identityBuilder = new IdentityBuilder(identityBuilder.UserType, typeof(IdentityRole<int>), identityBuilder.Services);
-            identityBuilder.AddEntityFrameworkStores<FoodOrderContext>();
+            identityBuilder.AddEntityFrameworkStores<FoodOrderContext>().AddDefaultTokenProviders();
             identityBuilder.AddUserManager<UserManager<UserModel>>();
             identityBuilder.AddSignInManager<SignInManager<UserModel>>();
 
