@@ -35,6 +35,11 @@ namespace FoodOrderApp.Services
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Signs in user
+        /// </summary>
+        /// <param name="userToLogin">Username and password of user</param>
+        /// <returns>Generated token or errors that occured during sign in process</returns>
         public async Task<IServiceResult<string>> LoginAsync(UserToLoginDto userToLogin)
         {
             try
@@ -72,10 +77,12 @@ namespace FoodOrderApp.Services
 
 
         /// <summary>
-        /// Creates/Registers new user in database
+        /// Registers new user to the application
         /// </summary>
-        /// <param name="userToRegister">Correct user data from registration form - model state has been checked in controller layer</param>
-        /// <returns>Service result statuses: Created or Error</returns>
+        /// <param name="userToRegister">users data (email, username)</param>
+        /// <param name="password">password of the user</param>
+        /// <param name="Url">IUrlHelper used to generate account confirmation url</param>
+        /// <returns>New user object or list of errors</returns>
         public async Task<IServiceResult<UserModel>> RegisterAsync(UserModel userToRegister, string password, IUrlHelper url)
         {
             try

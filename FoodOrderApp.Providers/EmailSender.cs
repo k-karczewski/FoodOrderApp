@@ -24,6 +24,11 @@ namespace FoodOrderApp.Providers
             _configuration = null;
         }
 
+        /// <summary>
+        /// Sends confirmation email to users email address
+        /// </summary>
+        /// <param name="receiver">Recipent of email</param>
+        /// <param name="confirmationLink">confirmation link that will be included to message</param>
         public virtual async Task SendAccountConfirmation(UserModel receiver, string confirmationLink)
         {
             SendGridMessage message = new SendGridMessage

@@ -25,6 +25,12 @@ namespace FoodOrderApp.Providers
             _configuration = null;
         }
 
+        /// <summary>
+        /// Generates Json Web Token for authorized user
+        /// </summary>
+        /// <param name="authenticatedUser">User object that just logged in</param>
+        /// <param name="roles">roles of the user taken from db</param>
+        /// <returns>Generated JWT</returns>
         /*https://jasonwatmore.com/post/2019/10/11/aspnet-core-3-jwt-authentication-tutorial-with-example-api*/
         public string GenerateJwtBearer(UserModel authenticatedUser, IList<string> roles)
         {
