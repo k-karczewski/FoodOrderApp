@@ -62,6 +62,7 @@ namespace FoodOrderAppAPI
             identityBuilder.AddEntityFrameworkStores<FoodOrderContext>().AddDefaultTokenProviders();
             identityBuilder.AddUserManager<UserManager<UserModel>>();
             identityBuilder.AddSignInManager<SignInManager<UserModel>>();
+            identityBuilder.AddRoleManager<RoleManager<IdentityRole<int>>>();
 
             services.AddAuthentication(options =>
             {
@@ -79,6 +80,11 @@ namespace FoodOrderAppAPI
                     ValidateIssuer = false,
                     ValidateAudience = false
                 };
+            });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
             });
         }
 

@@ -22,32 +22,17 @@ namespace FoodOrderApp.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly UserManager<UserModel> _userManager;
         private readonly SignInManager<UserModel> _signInManager;
+        private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
 
-        public AuthService(UserManager<UserModel> userManager, SignInManager<UserModel> signInManager, IUnitOfWork unitOfWork, IConfiguration configuration)
+        public AuthService(SignInManager<UserModel> signInManager, RoleManager<IdentityRole<int>> roleManager, IUnitOfWork unitOfWork, IConfiguration configuration)
         {
-            _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _configuration = configuration;
             _unitOfWork = unitOfWork;
-        }
-
-
-        public async Task<IServiceResult<ICollection<string>>> GetUsersNames()
-        {
-            ICollection<string> usernames = new List<string>();
-
-            List<UserModel> users = (await _unitOfWork.Users.GetByExpressionAsync(x => x.Id > 0)).ToList();
-
-            foreach(UserModel user in users)
-            {
-                usernames.Add(user.UserName);
-            }
-
-            return new ServiceResult<ICollection<string>>(ResultType.Correct, usernames);
         }
 
         public async Task<IServiceResult<string>> LoginAsync(UserToLoginDto userToLogin)
@@ -65,9 +50,11 @@ namespace FoodOrderApp.Services
 
                 if(loginResult.Succeeded)
                 {
+                    IList<string> usersRoles = await _signInManager.UserManager.GetRolesAsync(user);
+
                     using(IJsonWebTokenProvider jwtProvider = new JsonWebTokenProvider(_configuration))
                     {
-                        string token = jwtProvider.GenerateJwtBearer(user);
+                        string token = jwtProvider.GenerateJwtBearer(user, usersRoles);
 
                         return new ServiceResult<string>(ResultType.Correct, token);
                     }
@@ -89,39 +76,32 @@ namespace FoodOrderApp.Services
         /// </summary>
         /// <param name="userToRegister">Correct user data from registration form - model state has been checked in controller layer</param>
         /// <returns>Service result statuses: Created or Error</returns>
-        public async Task<IServiceResult<UserModel>> RegisterAsync(UserToRegisterDto userToRegister, IUrlHelper url)
+        public async Task<IServiceResult<UserModel>> RegisterAsync(UserModel userToRegister, string password, IUrlHelper url)
         {
             try
             {
-                UserModel user = new UserModel
-                {
-                    UserName = userToRegister.Username,
-                    Email = userToRegister.EmailAddress
-                };
-
-
-                IdentityResult result = await _userManager.CreateAsync(user, userToRegister.Password);
+                IdentityResult result = await _signInManager.UserManager.CreateAsync(userToRegister, password);
 
                 if(result.Succeeded)
                 {
+                    // assign roles
+                    await userToRegister.AssignRole(userToRegister, _signInManager.UserManager, _roleManager);
+
                     // generate email confirmation token
-                    string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    string confirmationToken = await _signInManager.UserManager.GenerateEmailConfirmationTokenAsync(userToRegister);
 
                     // convert the token from UTF8 to bytes and then to URL
                     confirmationToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(confirmationToken));
 
-                    var values = new { userId = user.Id, token = confirmationToken };
-
-                    string urlLink = url.Action("ConfirmEmail", "Auth", new { userId = user.Id, token = confirmationToken }, "https");
-
+                    string urlLink = url.Action("ConfirmEmail", "Auth", new { userId = userToRegister.Id, token = confirmationToken }, "https");
                     urlLink = HtmlEncoder.Default.Encode(urlLink);
 
                     using (IEmailSender emailSender = new EmailSender(_configuration))
                     {
-                        await emailSender.SendAccountConfirmation(user, urlLink);
+                        await emailSender.SendAccountConfirmation(userToRegister, urlLink);
                     }
                                  
-                    return new ServiceResult<UserModel>(ResultType.Created, user);
+                    return new ServiceResult<UserModel>(ResultType.Created, userToRegister);
                 }
 
                 List<string> errors = new List<string>();
@@ -136,11 +116,11 @@ namespace FoodOrderApp.Services
             }
             catch(Exception e)
             {
-                UserModel registeredUser = (await _unitOfWork.Users.GetByExpressionAsync(x => x.UserName.ToLower() == userToRegister.Username.ToLower())).SingleOrDefault();
+                UserModel registeredUser = (await _unitOfWork.Users.GetByExpressionAsync(x => x.UserName.ToLower() == userToRegister.UserName.ToLower())).SingleOrDefault();
 
                 if (registeredUser != null)
                 {
-                    await _userManager.DeleteAsync(registeredUser);
+                    await _signInManager.UserManager.DeleteAsync(registeredUser);
                 }
 
                 return new ServiceResult<UserModel>(ResultType.Error, new List<string> { e.Message });
@@ -163,7 +143,7 @@ namespace FoodOrderApp.Services
                 {
                     string decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(confirmationToken));
 
-                    IdentityResult confirmationResult = await _userManager.ConfirmEmailAsync(userToBeConfirmed, decodedToken);
+                    IdentityResult confirmationResult = await _signInManager.UserManager.ConfirmEmailAsync(userToBeConfirmed, decodedToken);
 
                     if(confirmationResult.Succeeded)
                     {

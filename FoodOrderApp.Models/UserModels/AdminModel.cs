@@ -6,21 +6,21 @@ using System.Threading.Tasks;
 
 namespace FoodOrderApp.Models.UserModels
 {
-    public class UserModel : IdentityUser<int>
+    public class AdminModel : UserModel
     {
-        public virtual async Task AssignRole(UserModel user, UserManager<UserModel> userManager, RoleManager<IdentityRole<int>> roleManager)
+        public override async Task AssignRole(UserModel user, UserManager<UserModel> userManager, RoleManager<IdentityRole<int>> roleManager)
         {
-            bool roleExists = await roleManager.RoleExistsAsync("User");
+            bool roleExists = await roleManager.RoleExistsAsync("Admin");
 
             if (roleExists == false)
             {
                 await roleManager.CreateAsync(new IdentityRole<int>
                 {
-                    Name = "User"
+                    Name = "Admin"
                 });
             }
 
-            await userManager.AddToRoleAsync(user, "User");
+            await userManager.AddToRoleAsync(user, "Admin");
         }
     }
 }

@@ -22,23 +22,50 @@ namespace FoodOrderAppAPI.Controllers
             _authService = signUpService;
         }
 
-        [HttpGet("users")]
-        public async Task<IActionResult> GetAllUsers()
-        {
-            IServiceResult<ICollection<string>> result = await _authService.GetUsersNames();
-
-            return Ok(result.Errors);
-        }
-
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUserAsync(UserToRegisterDto userToRegister)
         {
             if(ModelState.IsValid)
             {
-                IServiceResult<UserModel> registerResult = await _authService.RegisterAsync(userToRegister, Url);
+                UserModel user = new UserModel
+                {
+                    UserName = userToRegister.Username,
+                    Email = userToRegister.EmailAddress
+                };
+
+                IServiceResult<UserModel> registerResult = await _authService.RegisterAsync(user, userToRegister.Password, Url);
 
                 if(registerResult.Result == ResultType.Created)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(registerResult.Errors);
+                }
+            }
+            else
+            {
+                return BadRequest(ModelState.Values);
+            }
+        }
+       
+        [HttpPost("admin/register")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<IActionResult> RegisterAdminAsync(UserToRegisterDto userToRegister)
+        {
+            if (ModelState.IsValid)
+            {
+                UserModel user = new AdminModel
+                {
+                    UserName = userToRegister.Username,
+                    Email = userToRegister.EmailAddress
+                };
+
+                IServiceResult<UserModel> registerResult = await _authService.RegisterAsync(user, userToRegister.Password, Url);
+
+                if (registerResult.Result == ResultType.Created)
                 {
                     return Ok();
                 }

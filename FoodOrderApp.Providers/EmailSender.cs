@@ -38,8 +38,7 @@ namespace FoodOrderApp.Providers
 
             SendGridClient client = new SendGridClient(_configuration.GetSection("SendGridKeys:DefaultKey").Value);
 
-            var response = await client.SendEmailAsync(message);
-
+            await client.SendEmailAsync(message);
         }
     }
 }

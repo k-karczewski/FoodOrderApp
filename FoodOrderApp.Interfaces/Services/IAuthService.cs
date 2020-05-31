@@ -11,14 +11,8 @@ namespace FoodOrderApp.Interfaces.Services
 {
     public interface IAuthService
     {
-        /// <summary>
-        /// temporary method - to be removed later
-        /// </summary>
-        /// <returns></returns>
-        Task<IServiceResult<ICollection<string>>> GetUsersNames();
         Task<IServiceResult<string>> LoginAsync(UserToLoginDto userToLogin);
-        Task<IServiceResult<UserModel>> RegisterAsync(UserToRegisterDto userToCreate, IUrlHelper Url);
-
+        Task<IServiceResult<UserModel>> RegisterAsync(UserModel userToRegister, string password, IUrlHelper Url);
         /// <summary>
         /// Confirms user's email address when generated url was clicked
         /// </summary>
