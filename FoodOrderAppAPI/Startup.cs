@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using FoodOrderApp.Data.DataContext;
 using FoodOrderApp.Data.Repositories;
@@ -10,17 +11,20 @@ using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.UnitOfWork;
 using FoodOrderApp.Models.PizzaModels;
 using FoodOrderApp.Models.PizzaModels.PriceModels;
+using FoodOrderApp.Models.UserModels;
 using FoodOrderApp.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
+using Microsoft.IdentityModel.Tokens;
 
 namespace FoodOrderAppAPI
 {
@@ -45,6 +49,45 @@ namespace FoodOrderAppAPI
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPizzaService, PizzaService>();
             services.AddScoped<IIngredientService, IngredientService>();
+            services.AddScoped<IAuthService, AuthService>();
+
+            IdentityBuilder identityBuilder = services.AddIdentityCore<UserModel>(options => {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 4;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.User.RequireUniqueEmail = true;
+                options.SignIn.RequireConfirmedAccount = true;
+            });
+
+            identityBuilder = new IdentityBuilder(identityBuilder.UserType, typeof(IdentityRole<int>), identityBuilder.Services);
+            identityBuilder.AddEntityFrameworkStores<FoodOrderContext>().AddDefaultTokenProviders();
+            identityBuilder.AddUserManager<UserManager<UserModel>>();
+            identityBuilder.AddSignInManager<SignInManager<UserModel>>();
+            identityBuilder.AddRoleManager<RoleManager<IdentityRole<int>>>();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("AuthKeys:DefaultKey").Value)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+            });
         }
 
 
@@ -60,6 +103,7 @@ namespace FoodOrderAppAPI
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
