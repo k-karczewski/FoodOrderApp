@@ -56,6 +56,8 @@ namespace FoodOrderAppAPI
                 options.Password.RequiredLength = 4;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
+                options.User.RequireUniqueEmail = true;
+                options.SignIn.RequireConfirmedAccount = true;
             });
 
             identityBuilder = new IdentityBuilder(identityBuilder.UserType, typeof(IdentityRole<int>), identityBuilder.Services);
