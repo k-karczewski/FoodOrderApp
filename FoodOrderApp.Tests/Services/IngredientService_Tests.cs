@@ -1,13 +1,10 @@
-﻿using Autofac.Extras.Moq;
-using FoodOrderApp.Data.Repositories;
-using FoodOrderApp.Interfaces.Repositories;
+﻿using FoodOrderApp.Interfaces.Repositories;
 using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Interfaces.UnitOfWork;
 using FoodOrderApp.Models.PizzaModels;
 using FoodOrderApp.Models.PizzaModels.PriceModels;
 using FoodOrderApp.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -15,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FoodOrderApp.Tests.Services
