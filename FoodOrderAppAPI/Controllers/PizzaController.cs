@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Models.Dtos;
 using FoodOrderApp.Models.PizzaModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
@@ -23,6 +22,7 @@ namespace FoodOrderAppAPI.Controllers
         }
 
         [HttpPost("create")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> Create(PizzaToCreateDto pizzaToCreate)
         {
             IServiceResult<PizzaToReturnDto> result = await _service.CreateAsync(pizzaToCreate);
@@ -37,6 +37,7 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("name/{name}", Name = "GetPizzaByName")]
         public async Task<IActionResult> GetByName(string name)
         {
@@ -68,6 +69,7 @@ namespace FoodOrderAppAPI.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Get()
         {
             IServiceResult<List<PizzaToReturnDto>> result = await _service.GetAsync();
@@ -82,6 +84,7 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpPut("{pizzaName}/add-ingredient/{ingredientId}")]
         public async Task<IActionResult> AddIngredient(string pizzaName, int ingredientId)
         {
@@ -96,7 +99,8 @@ namespace FoodOrderAppAPI.Controllers
                 return BadRequest(result.Errors);
             }
         }
-
+        
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpPut("{pizzaName}/delete-ingredient/{ingredientId}")]
         public async Task<IActionResult> DeleteIngredient(string pizzaName, int ingredientId)
         {

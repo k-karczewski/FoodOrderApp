@@ -26,7 +26,7 @@ namespace FoodOrderApp.Services
             try
             {
                 // check if ingredient with that name already exists in db
-                bool doesExistInDb = (await _repository.Ingredients.GetByExpressionAsync(x => x.Name == newObject.Name)).SingleOrDefault() == null ? false : true;
+                bool doesExistInDb = (await _repository.Ingredients.GetByExpressionAsync(x => x.Name.ToLower() == newObject.Name.ToLower(), null)).SingleOrDefault() == null ? false : true;
 
                 if(doesExistInDb == false)
                 {    
@@ -175,21 +175,7 @@ namespace FoodOrderApp.Services
                     await _repository.Ingredients.UpdateAsync(ingredientToUpdate);
                     await _repository.SaveChangesAsync();
 
-                    // update price of all pizzas that include edited ingredient
-                    List<PizzaModel> pizzasToUpdate = (await _repository.Pizzas.GetByExpressionAsync(x => x.Id > 0,
-                        i => i.Include(p => p.PizzaIngredients).ThenInclude(p => p.Ingredient).ThenInclude(p => p.Prices).Include(s => s.PizzaStarters).ThenInclude(s => s.Starter)))
-                                                        .Where(p => p.PizzaIngredients.Any(x => x.IngredientId == ingredientId)).ToList();
-                    if (pizzasToUpdate.Count > 0)
-                    {
-                        foreach (PizzaModel pizza in pizzasToUpdate)
-                        {
-                            pizza.TotalPrices = CountTotalPizzaPrice(pizza);
-                            await _repository.Pizzas.UpdateAsync(pizza);
-                        }
-
-                        // save context changes
-                        await _repository.SaveChangesAsync();
-                    }
+                    await UpdatePizzasPrices(ingredientId);
 
                     return new ServiceResult<IngredientModel>(ResultType.Edited, ingredientToUpdate);
                 }
@@ -205,6 +191,25 @@ namespace FoodOrderApp.Services
                 return new ServiceResult<IngredientModel>(ResultType.Error, new List<string> { e.Message });
             }
 
+        }
+
+        private async Task UpdatePizzasPrices(int ingredientId)
+        {
+            // update price of all pizzas that include edited ingredient
+            List<PizzaModel> pizzasToUpdate = (await _repository.Pizzas.GetByExpressionAsync(x => x.Id > 0,
+                i => i.Include(p => p.PizzaIngredients).ThenInclude(p => p.Ingredient).ThenInclude(p => p.Prices).Include(s => s.PizzaStarters).ThenInclude(s => s.Starter)))
+                                                .Where(p => p.PizzaIngredients.Any(x => x.IngredientId == ingredientId)).ToList();
+            if (pizzasToUpdate.Count > 0)
+            {
+                foreach (PizzaModel pizza in pizzasToUpdate)
+                {
+                    pizza.TotalPrices = CountTotalPizzaPrice(pizza);
+                    await _repository.Pizzas.UpdateAsync(pizza);
+                }
+
+                // save context changes
+                await _repository.SaveChangesAsync();
+            }
         }
     }
 }
