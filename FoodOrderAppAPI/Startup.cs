@@ -50,6 +50,7 @@ namespace FoodOrderAppAPI
             services.AddScoped<IPizzaService, PizzaService>();
             services.AddScoped<IIngredientService, IngredientService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IPhotoService, PhotoService>();
 
             IdentityBuilder identityBuilder = services.AddIdentityCore<UserModel>(options => {
                 options.Password.RequireDigit = false;
@@ -57,7 +58,7 @@ namespace FoodOrderAppAPI
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.User.RequireUniqueEmail = true;
-                options.SignIn.RequireConfirmedAccount = true;
+                options.SignIn.RequireConfirmedAccount = false;
             });
 
             identityBuilder = new IdentityBuilder(identityBuilder.UserType, typeof(IdentityRole<int>), identityBuilder.Services);
@@ -98,6 +99,8 @@ namespace FoodOrderAppAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseHttpsRedirection();
 
