@@ -57,7 +57,7 @@ namespace FoodOrderApp.Services
 
                     var uploadParams = new ImageUploadParams()
                     {
-                        File = new FileDescription($"Pizza with id {newPhoto.PizzaId} photo", new MemoryStream(newPhoto.PhotoInBytes))
+                        File = new FileDescription($"Photo of {photoRecipent.Name} pizza", new MemoryStream(newPhoto.PhotoInBytes))
                     };
 
                     ImageUploadResult response = await _cloudinary.UploadAsync(uploadParams);
