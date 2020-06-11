@@ -3,6 +3,7 @@ using FoodOrderApp.Data.Repositories;
 using FoodOrderApp.Interfaces.Repositories;
 using FoodOrderApp.Interfaces.UnitOfWork;
 using FoodOrderApp.Models.PizzaModels;
+using FoodOrderApp.Models.PizzaModels.PhotoModels;
 using FoodOrderApp.Models.UserModels;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace FoodOrderApp.Data.UnitOfWork
         public IFoodOrderRepository<PizzaModel> Pizzas { get; }
         public IFoodOrderRepository<StarterModel> Starters { get; }
         public IFoodOrderRepository<UserModel> Users { get; }
+        public IFoodOrderRepository<PhotoModel> Photos { get; }
 
         public UnitOfWork(FoodOrderContext context)
         {
@@ -26,6 +28,7 @@ namespace FoodOrderApp.Data.UnitOfWork
             Pizzas = new FoodOrderRepository<PizzaModel>(context);
             Starters = new FoodOrderRepository<StarterModel>(context);
             Users = new FoodOrderRepository<UserModel>(context);
+            Photos = new FoodOrderRepository<PhotoModel>(context);
         }
 
         public async Task SaveChangesAsync()

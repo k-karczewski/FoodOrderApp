@@ -1,4 +1,5 @@
 ﻿using FoodOrderApp.Models.PizzaModels;
+using FoodOrderApp.Models.PizzaModels.PhotoModels;
 using FoodOrderApp.Models.PizzaModels.PriceModels;
 using FoodOrderApp.Models.UserModels;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +13,7 @@ namespace FoodOrderApp.Data.DataContext
         public DbSet<IngredientModel> Ingredients { get; set; }
         public DbSet<StarterModel> Starters { get; set; }
         public DbSet<PizzaModel> Pizzas { get; set; }
+        public DbSet<PhotoModel> Photos { get; set; }
 
         public FoodOrderContext(DbContextOptions options) : base(options) { }
 
@@ -51,6 +53,7 @@ namespace FoodOrderApp.Data.DataContext
             {
                 entity.HasKey(k => k.Id);
                 entity.HasMany(t => t.TotalPrices).WithOne(p => p.Pizza);
+                entity.HasOne(p => p.Photo).WithOne(p => p.Pizza);
                 entity.ToTable("Pizzas");
             });
 
@@ -70,6 +73,7 @@ namespace FoodOrderApp.Data.DataContext
             modelBuilder.Entity<IdentityUserLogin<int>>(entity => entity.ToTable("UserLogins"));
             modelBuilder.Entity<IdentityRoleClaim<int>>(entity => entity.ToTable("RoleClaims"));
             modelBuilder.Entity<IdentityUserToken<int>>(entity => entity.ToTable("UserTokens"));
+            modelBuilder.Entity<PhotoModel>(entity => entity.ToTable("Photos"));
         }
     }
 }
