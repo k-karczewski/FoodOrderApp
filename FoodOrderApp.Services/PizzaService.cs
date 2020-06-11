@@ -32,7 +32,7 @@ namespace FoodOrderApp.Services
                     (await _repository.Pizzas.GetByExpressionAsync(x => x.Name != "",
                                                    i => i.Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
                                                    Include(x => x.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
-                                                   Include(tp => tp.TotalPrices))).ToList();
+                                                   Include(tp => tp.TotalPrices).Include(p => p.Photo))).ToList();
 
                 // if pizzas were found
                 if (pizzas != null && pizzas.Count > 0)
@@ -395,8 +395,13 @@ namespace FoodOrderApp.Services
                 Id = pizza.Id,
                 Name = pizza.Name,
                 TotalPrices = new List<PriceToReturnDto>(),
-                Ingredients = ingredientsToReturn
+                Ingredients = ingredientsToReturn,          
             };
+
+            if(pizza.Photo != null)
+            {
+                pizzaToReturn.PhotoUrl = pizza.Photo.Url;
+            }
 
             foreach (PizzaPriceModel p in pizza.TotalPrices)
             {
@@ -442,7 +447,7 @@ namespace FoodOrderApp.Services
             return (await _repository.Pizzas.GetByExpressionAsync(x => x.Name.ToLower() == name.ToLower(),
                                                 i => i.Include(pi => pi.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
                                                 Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
-                                                Include(tp => tp.TotalPrices))).FirstOrDefault();
+                                                Include(tp => tp.TotalPrices).Include(p => p.Photo))).FirstOrDefault();
         }
 
         /// <summary>
@@ -455,7 +460,7 @@ namespace FoodOrderApp.Services
             return (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == id,
                                                     i => i.Include(s => s.PizzaStarters).ThenInclude(s => s.Starter).
                                                     Include(x => x.PizzaIngredients).ThenInclude(i => i.Ingredient).ThenInclude(p => p.Prices).
-                                                    Include(tp => tp.TotalPrices))).SingleOrDefault();
+                                                    Include(tp => tp.TotalPrices).Include(p => p.Photo))).SingleOrDefault();
         }
     }
 }

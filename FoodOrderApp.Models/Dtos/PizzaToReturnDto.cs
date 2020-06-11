@@ -9,9 +9,9 @@ namespace FoodOrderApp.Models.Dtos
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string PhotoUrl { get; set; }
 
         public ICollection<PriceToReturnDto> TotalPrices { get; set; }
-        //public ICollection<StarterToReturnDto> Starters { get; set; }
         public ICollection<IngredientToReturnDto> Ingredients { get; set; }
     }
 }
