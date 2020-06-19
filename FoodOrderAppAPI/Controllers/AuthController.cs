@@ -90,7 +90,10 @@ namespace FoodOrderAppAPI.Controllers
 
                 if (loginResult.Result == ResultType.Correct)
                 {
-                    return Ok(loginResult.ReturnedObject);
+                    return Ok(new
+                    {
+                        token = loginResult.ReturnedObject
+                    });
                 }
                 else
                 {
