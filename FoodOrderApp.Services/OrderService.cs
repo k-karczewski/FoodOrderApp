@@ -26,6 +26,12 @@ namespace FoodOrderApp.Services
             _repository = repository;
         }
 
+        /// <summary>
+        /// Creates new order
+        /// </summary>
+        /// <param name="pizzas">List of pizzas to order</param>
+        /// <param name="userId">id of user that makes order</param>
+        /// <returns>ServiceResult of statuses correct or error</returns>
         public async Task<IServiceResult> MakeOrder(ICollection<PizzaToOrderDto> pizzas, int userId)
         {
             try
@@ -62,6 +68,13 @@ namespace FoodOrderApp.Services
             }
         }
 
+
+        /// <summary>
+        /// Cancels order
+        /// </summary>
+        /// <param name="orderId">id of order to be canceled</param>
+        /// <param name="userId">id of user that order belongs to</param>
+        /// <returns>ServiceResult of statuses correct or error</returns>
         public async Task<IServiceResult> CancelOrder(int orderId, int userId)
         {
             try
