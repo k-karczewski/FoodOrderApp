@@ -136,7 +136,7 @@ namespace FoodOrderApp.Services
                 {
                     // update price and save context changes
                     UpdateTotalPizzaPrices(pizza);
-                    _repository.Pizzas.UpdateAsync(pizza);
+                    _repository.Pizzas.Update(pizza);
 
                     return new ServiceResult<PizzaModel>(ResultType.Correct, pizza);
                 }
@@ -166,7 +166,7 @@ namespace FoodOrderApp.Services
                 if (pizza != null)
                 {
                     // delete the pizza and save context changes
-                     _repository.Pizzas.DeleteAsync(pizza);
+                     _repository.Pizzas.Delete(pizza);
                     await _repository.SaveChangesAsync();
 
                     return new ServiceResult(ResultType.Deleted);
@@ -237,7 +237,7 @@ namespace FoodOrderApp.Services
 
                         UpdateTotalPizzaPrices(pizzaToUpdate);
 
-                        _repository.Pizzas.UpdateAsync(pizzaToUpdate);
+                        _repository.Pizzas.Update(pizzaToUpdate);
 
                         await _repository.SaveChangesAsync();
 
@@ -282,7 +282,7 @@ namespace FoodOrderApp.Services
                         pizzaToUpdate.PizzaIngredients.Remove(pizzaToUpdate.PizzaIngredients.SingleOrDefault(x => x.IngredientId == ingredientId));
                         UpdateTotalPizzaPrices(pizzaToUpdate);
 
-                        _repository.Pizzas.UpdateAsync(pizzaToUpdate);
+                        _repository.Pizzas.Update(pizzaToUpdate);
                         await _repository.SaveChangesAsync();
 
                         PizzaToReturnDto pizzaToReturn = CreatePizzaToReturn(pizzaToUpdate);

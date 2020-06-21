@@ -68,7 +68,7 @@ namespace FoodOrderApp.Services
                 if (ingredientToDelete != null)
                 {
                     // try to delete it
-                    _repository.Ingredients.DeleteAsync(ingredientToDelete);
+                    _repository.Ingredients.Delete(ingredientToDelete);
                     // save changes in database context
                     await _repository.SaveChangesAsync();
 
@@ -159,7 +159,7 @@ namespace FoodOrderApp.Services
                     priceToUpdate.Price = price.Price;
 
                     // update database entry and save context changes
-                    _repository.Ingredients.UpdateAsync(ingredientToUpdate);
+                    _repository.Ingredients.Update(ingredientToUpdate);
                     await _repository.SaveChangesAsync();
 
                     await UpdatePizzasPrices(ingredientId);
@@ -191,7 +191,7 @@ namespace FoodOrderApp.Services
                 foreach (PizzaModel pizza in pizzasToUpdate)
                 {
                     UpdateTotalPizzaPrices(pizza);
-                    _repository.Pizzas.UpdateAsync(pizza);
+                    _repository.Pizzas.Update(pizza);
                 }
 
                 // save context changes

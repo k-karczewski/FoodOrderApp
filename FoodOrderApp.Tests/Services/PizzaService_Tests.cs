@@ -225,7 +225,7 @@ namespace FoodOrderApp.Tests.Services
             pizzaRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<PizzaModel, bool>>>(),
                                            It.IsAny<Func<IQueryable<PizzaModel>, IIncludableQueryable<PizzaModel, object>>>())).Returns(GetPizzaById(expectedPizzaId));
 
-            pizzaRepoMock.Setup(x => x.DeleteAsync(It.IsAny<PizzaModel>()));
+            pizzaRepoMock.Setup(x => x.Delete(It.IsAny<PizzaModel>()));
 
             uowMock.Setup(x => x.Pizzas).Returns(pizzaRepoMock.Object);
             uowMock.Setup(x => x.SaveChangesAsync()).Returns(Task.FromResult(true));
@@ -308,7 +308,7 @@ namespace FoodOrderApp.Tests.Services
             pizzaRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<PizzaModel, bool>>>(),
                    It.IsAny<Func<IQueryable<PizzaModel>, IIncludableQueryable<PizzaModel, object>>>())).Returns(GetPizzaByName(expectedPizzaName));
 
-            pizzaRepoMock.Setup(x => x.UpdateAsync(It.IsAny<PizzaModel>()));
+            pizzaRepoMock.Setup(x => x.Update(It.IsAny<PizzaModel>()));
 
             Mock<IFoodOrderRepository<IngredientModel>> ingredientRepoMock = new Mock<IFoodOrderRepository<IngredientModel>>();
             ingredientRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<IngredientModel, bool>>>(),
@@ -364,7 +364,7 @@ namespace FoodOrderApp.Tests.Services
             pizzaRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<PizzaModel, bool>>>(),
                    It.IsAny<Func<IQueryable<PizzaModel>, IIncludableQueryable<PizzaModel, object>>>())).Returns(GetPizzaByName(expectedPizzaName));
 
-            pizzaRepoMock.Setup(x => x.UpdateAsync(It.IsAny<PizzaModel>()));
+            pizzaRepoMock.Setup(x => x.Update(It.IsAny<PizzaModel>()));
 
             Mock<IFoodOrderRepository<IngredientModel>> ingredientRepoMock = new Mock<IFoodOrderRepository<IngredientModel>>();
             ingredientRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<IngredientModel, bool>>>(),

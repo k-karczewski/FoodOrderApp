@@ -62,9 +62,28 @@ namespace FoodOrderApp.Services
             }
         }
 
-        public Task<IServiceResult> CancelOrder(int orderId)
+        public async Task<IServiceResult> CancelOrder(int orderId, int userId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                OrderModel orderToCancel = (await _repository.Orders.GetByExpressionAsync(x => x.Id == orderId)).SingleOrDefault();
+
+                if(orderToCancel != null && orderToCancel.UserId == userId)
+                {
+                    orderToCancel.Status = OrderStatus.Canceled;
+                    _repository.Orders.Update(orderToCancel);
+                    await _repository.SaveChangesAsync();
+
+                    return new ServiceResult(ResultType.Edited);
+                }
+
+                throw new Exception("Order does not exist or wrong user was chosen");
+
+            }
+            catch(Exception e)
+            {
+                return new ServiceResult(ResultType.Error, new List<string> { e.Message });
+            }
         }
 
         private async Task<bool> CheckIfPizzasExist(IEnumerable<int> pizzaIds)

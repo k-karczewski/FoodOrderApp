@@ -38,5 +38,21 @@ namespace FoodOrderAppAPI.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpPost]
+        [Route("cancel/{orderId}")]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            IServiceResult orderResult = await _orderService.CancelOrder(orderId, int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value));
+
+            if (orderResult.Result == ResultType.Edited)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
     }
 }

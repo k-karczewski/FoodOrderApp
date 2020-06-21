@@ -25,12 +25,12 @@ namespace FoodOrderApp.Data.Repositories
             await _dbSet.AddAsync(newObject);
         }
 
-        public void DeleteAsync(TEntity objectToDelete)
+        public void Delete(TEntity objectToDelete)
         {
             _dbSet.Remove(objectToDelete);
         }
 
-        public void UpdateAsync(TEntity editedObject)
+        public void Update(TEntity editedObject)
         {
             _dbSet.Update(editedObject);
         }

@@ -195,7 +195,7 @@ namespace FoodOrderApp.Tests.Services
         public async Task DeleteExistingIngredient()
         {
             repoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<IngredientModel, bool>>>(), null)).Returns(GetFakeIngredientByName(expectedIngredients[0].Name));
-            repoMock.Setup(x => x.DeleteAsync(expectedIngredients[0]));
+            repoMock.Setup(x => x.Delete(expectedIngredients[0]));
 
             uowMock.Setup(x => x.Ingredients).Returns(repoMock.Object);
 
@@ -246,13 +246,13 @@ namespace FoodOrderApp.Tests.Services
                                            It.IsAny<Func<IQueryable<IngredientModel>, IIncludableQueryable<IngredientModel, object>>>())).
                                            Returns(GetFakeIngredientById(idOfIngredient));
 
-            repoMock.Setup(x => x.UpdateAsync(expectedIngredients[idOfIngredient]));
+            repoMock.Setup(x => x.Update(expectedIngredients[idOfIngredient]));
 
             pizzaRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<PizzaModel, bool>>>(),
                                            It.IsAny<Func<IQueryable<PizzaModel>, IIncludableQueryable<PizzaModel, object>>>())).
                                            Returns(GetFakePizzas());
 
-            pizzaRepoMock.Setup(x => x.UpdateAsync(pizza));
+            pizzaRepoMock.Setup(x => x.Update(pizza));
 
 
             uowMock.Setup(x => x.Ingredients).Returns(repoMock.Object);

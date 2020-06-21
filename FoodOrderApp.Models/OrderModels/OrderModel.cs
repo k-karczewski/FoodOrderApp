@@ -1,4 +1,5 @@
-﻿using FoodOrderApp.Models.PizzaModels;
+﻿using FoodOrderApp.Models.Enums;
+using FoodOrderApp.Models.PizzaModels;
 using FoodOrderApp.Models.UserModels;
 using System;
 using System.Collections.Generic;
@@ -18,12 +19,5 @@ namespace FoodOrderApp.Models.OrderModels
         public ICollection<PizzaOrderModel> PizzaOrders { get; set; }
 
         public OrderStatus Status { get; set; }
-    }
-
-    public enum OrderStatus
-    {
-        New,
-        Confirmed,
-        Finished
     }
 }

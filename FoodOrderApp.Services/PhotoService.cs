@@ -124,7 +124,7 @@ namespace FoodOrderApp.Services
             try
             {
                 await _cloudinary.DeleteResourcesAsync(photo.PublicId);
-                _unitOfWork.Photos.DeleteAsync(photo);
+                _unitOfWork.Photos.Delete(photo);
 
                 return true;
             }

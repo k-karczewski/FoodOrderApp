@@ -12,6 +12,14 @@ namespace FoodOrderApp.Models.Enums
         Large
     }
 
+    public enum OrderStatus
+    {
+        New,
+        Confirmed,
+        Canceled,
+        Finished
+    }
+
     public enum ResultType
     {
         Correct,
