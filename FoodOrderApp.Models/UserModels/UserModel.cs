@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using FoodOrderApp.Models.OrderModels;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,6 +9,9 @@ namespace FoodOrderApp.Models.UserModels
 {
     public class UserModel : IdentityUser<int>
     {
+        public ICollection<OrderModel> Orders { get; set; }
+
+
         public virtual async Task AssignRole(UserModel user, UserManager<UserModel> userManager, RoleManager<IdentityRole<int>> roleManager)
         {
             bool roleExists = await roleManager.RoleExistsAsync("User");

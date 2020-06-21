@@ -1,15 +1,8 @@
 ﻿using FoodOrderApp.Data.DataContext;
-using FoodOrderApp.Data.Repositories;
-using FoodOrderApp.Interfaces.Repositories;
 using FoodOrderApp.Models.PizzaModels;
-using FoodOrderApp.Models.PizzaModels.PriceModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FoodOrderApp.Tests.Data.Repositories
 {

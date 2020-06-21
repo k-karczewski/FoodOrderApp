@@ -4,6 +4,7 @@ using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Interfaces.UnitOfWork;
 using FoodOrderApp.Models.Dtos;
+using FoodOrderApp.Models.Enums;
 using FoodOrderApp.Models.PizzaModels;
 using FoodOrderApp.Models.PizzaModels.PhotoModels;
 using FoodOrderApp.Services.ServiceResults;
@@ -123,7 +124,7 @@ namespace FoodOrderApp.Services
             try
             {
                 await _cloudinary.DeleteResourcesAsync(photo.PublicId);
-                await _unitOfWork.Photos.DeleteAsync(photo);
+                _unitOfWork.Photos.DeleteAsync(photo);
 
                 return true;
             }

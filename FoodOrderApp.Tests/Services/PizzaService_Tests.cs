@@ -3,8 +3,9 @@ using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Interfaces.UnitOfWork;
 using FoodOrderApp.Models.Dtos;
+using FoodOrderApp.Models.Enums;
 using FoodOrderApp.Models.PizzaModels;
-using FoodOrderApp.Models.PizzaModels.PriceModels;
+using FoodOrderApp.Models.PizzaModels.DetailModels;
 using FoodOrderApp.Services;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -49,8 +50,8 @@ namespace FoodOrderApp.Tests.Services
             uowMock.Setup(x => x.Pizzas).Returns(pizzaRepoMock.Object);
 
             // create instance of service
-            IPizzaService service = new PizzaService(uowMock.Object);  
-            
+            IPizzaService service = new PizzaService(uowMock.Object);
+
             // call function to test
             IServiceResult<PizzaToReturnDto> result = await service.GetByNameAsync(expectedPizzaName);
 
@@ -60,13 +61,13 @@ namespace FoodOrderApp.Tests.Services
             Assert.AreEqual(expectedPizza.Id, result.ReturnedObject.Id);
             Assert.AreEqual(expectedPizza.Name.ToLower(), result.ReturnedObject.Name.ToLower());
             Assert.AreEqual(expectedPizza.PizzaIngredients.Count, result.ReturnedObject.Ingredients.Count);
-            Assert.AreEqual(expectedPizza.TotalPrices.Count, result.ReturnedObject.TotalPrices.Count);
+            Assert.AreEqual(expectedPizza.PizzaDetails.Count, result.ReturnedObject.TotalPrices.Count);
 
             // check of total price makes sure that also ingredients have correct prices
-            for(int i = 0; i < expectedPizza.TotalPrices.Count; i++)
+            for (int i = 0; i < expectedPizza.PizzaDetails.Count; i++)
             {
-                Assert.AreEqual(expectedPizza.TotalPrices.ElementAt(i).Price, result.ReturnedObject.TotalPrices.ElementAt(i).Price);
-            }         
+                Assert.AreEqual(expectedPizza.PizzaDetails.ElementAt(i).TotalPrice, result.ReturnedObject.TotalPrices.ElementAt(i).Price);
+            }
         }
 
         [TestMethod]
@@ -109,19 +110,19 @@ namespace FoodOrderApp.Tests.Services
             IPizzaService service = new PizzaService(uowMock.Object);
 
             // call function to test
-            IServiceResult<PizzaModel> result = await service.GetByIdAsync(expectedId);
-
+            IServiceResult<PizzaToReturnDto> result = await service.GetByIdAsync(expectedId);
+            // asserts
             Assert.AreEqual(ResultType.Correct, result.Result);
             Assert.IsNotNull(result.ReturnedObject);
             Assert.AreEqual(expectedPizza.Id, result.ReturnedObject.Id);
             Assert.AreEqual(expectedPizza.Name.ToLower(), result.ReturnedObject.Name.ToLower());
-            Assert.AreEqual(expectedPizza.PizzaIngredients.Count, result.ReturnedObject.PizzaIngredients.Count);
-            Assert.AreEqual(expectedPizza.TotalPrices.Count, result.ReturnedObject.TotalPrices.Count);
+            Assert.AreEqual(expectedPizza.PizzaIngredients.Count, result.ReturnedObject.Ingredients.Count);
+            Assert.AreEqual(expectedPizza.PizzaDetails.Count, result.ReturnedObject.TotalPrices.Count);
 
             // check of total price makes sure that also ingredients have correct prices
-            for (int i = 0; i < expectedPizza.TotalPrices.Count; i++)
+            for (int i = 0; i < expectedPizza.PizzaDetails.Count; i++)
             {
-                Assert.AreEqual(expectedPizza.TotalPrices.ElementAt(i).Price, result.ReturnedObject.TotalPrices.ElementAt(i).Price);
+                Assert.AreEqual(expectedPizza.PizzaDetails.ElementAt(i).TotalPrice, result.ReturnedObject.TotalPrices.ElementAt(i).Price);
             }
         }
 
@@ -140,7 +141,7 @@ namespace FoodOrderApp.Tests.Services
             IPizzaService service = new PizzaService(uowMock.Object);
 
             // call function to test
-            IServiceResult<PizzaModel> result = await service.GetByIdAsync(expectedId);
+            IServiceResult<PizzaToReturnDto> result = await service.GetByIdAsync(expectedId);
 
             Assert.AreEqual(ResultType.Error, result.Result);
             Assert.IsNull(result.ReturnedObject);
@@ -224,7 +225,7 @@ namespace FoodOrderApp.Tests.Services
             pizzaRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<PizzaModel, bool>>>(),
                                            It.IsAny<Func<IQueryable<PizzaModel>, IIncludableQueryable<PizzaModel, object>>>())).Returns(GetPizzaById(expectedPizzaId));
 
-            pizzaRepoMock.Setup(x => x.DeleteAsync(It.IsAny<PizzaModel>())).Returns(Task.FromResult(true));
+            pizzaRepoMock.Setup(x => x.DeleteAsync(It.IsAny<PizzaModel>()));
 
             uowMock.Setup(x => x.Pizzas).Returns(pizzaRepoMock.Object);
             uowMock.Setup(x => x.SaveChangesAsync()).Returns(Task.FromResult(true));
@@ -261,8 +262,6 @@ namespace FoodOrderApp.Tests.Services
         {
             int expectedPizzaId = 1;
 
-            expectedPizzas.First().TotalPrices = new List<PizzaPriceModel>();
-            
             pizzaRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<PizzaModel, bool>>>(),
                                It.IsAny<Func<IQueryable<PizzaModel>, IIncludableQueryable<PizzaModel, object>>>())).Returns(GetPizzaById(expectedPizzaId));
 
@@ -273,11 +272,11 @@ namespace FoodOrderApp.Tests.Services
 
             Assert.AreEqual(ResultType.Correct, priceUpdateResult.Result);
             Assert.IsNotNull(priceUpdateResult.ReturnedObject);
-            Assert.AreEqual(4, priceUpdateResult.ReturnedObject.TotalPrices.Count);
+            Assert.AreEqual(4, priceUpdateResult.ReturnedObject.PizzaDetails.Count);
 
-            for(int i = 0; i < priceUpdateResult.ReturnedObject.TotalPrices.Count; i++)
+            for (int i = 0; i < priceUpdateResult.ReturnedObject.PizzaDetails.Count; i++)
             {
-                Assert.AreNotEqual(0, priceUpdateResult.ReturnedObject.TotalPrices.ElementAt(i).Price);
+                Assert.AreNotEqual(0, priceUpdateResult.ReturnedObject.PizzaDetails.ElementAt(i).TotalPrice);
             }
         }
 
@@ -309,7 +308,7 @@ namespace FoodOrderApp.Tests.Services
             pizzaRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<PizzaModel, bool>>>(),
                    It.IsAny<Func<IQueryable<PizzaModel>, IIncludableQueryable<PizzaModel, object>>>())).Returns(GetPizzaByName(expectedPizzaName));
 
-            pizzaRepoMock.Setup(x => x.UpdateAsync(It.IsAny<PizzaModel>())).Returns(Task.FromResult(true));
+            pizzaRepoMock.Setup(x => x.UpdateAsync(It.IsAny<PizzaModel>()));
 
             Mock<IFoodOrderRepository<IngredientModel>> ingredientRepoMock = new Mock<IFoodOrderRepository<IngredientModel>>();
             ingredientRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<IngredientModel, bool>>>(),
@@ -327,9 +326,9 @@ namespace FoodOrderApp.Tests.Services
             Assert.IsNull(result.Errors);
             Assert.AreEqual(3, result.ReturnedObject.Ingredients.Count);
 
-            for(int i = 0; i < result.ReturnedObject.TotalPrices.Count; i++)
+            for (int i = 0; i < result.ReturnedObject.TotalPrices.Count; i++)
             {
-                Assert.AreEqual(expectedPizzas.First().TotalPrices.ElementAt(i).Price, result.ReturnedObject.TotalPrices.ElementAt(i).Price);
+                Assert.AreEqual(expectedPizzas.First().PizzaDetails.ElementAt(i).TotalPrice, result.ReturnedObject.TotalPrices.ElementAt(i).Price);
             }
         }
 
@@ -365,7 +364,7 @@ namespace FoodOrderApp.Tests.Services
             pizzaRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<PizzaModel, bool>>>(),
                    It.IsAny<Func<IQueryable<PizzaModel>, IIncludableQueryable<PizzaModel, object>>>())).Returns(GetPizzaByName(expectedPizzaName));
 
-            pizzaRepoMock.Setup(x => x.UpdateAsync(It.IsAny<PizzaModel>())).Returns(Task.FromResult(true));
+            pizzaRepoMock.Setup(x => x.UpdateAsync(It.IsAny<PizzaModel>()));
 
             Mock<IFoodOrderRepository<IngredientModel>> ingredientRepoMock = new Mock<IFoodOrderRepository<IngredientModel>>();
             ingredientRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<IngredientModel, bool>>>(),
@@ -385,7 +384,7 @@ namespace FoodOrderApp.Tests.Services
 
             for (int i = 0; i < result.ReturnedObject.TotalPrices.Count; i++)
             {
-                Assert.AreEqual(expectedPizzas.First().TotalPrices.ElementAt(i).Price, result.ReturnedObject.TotalPrices.ElementAt(i).Price);
+                Assert.AreEqual(expectedPizzas.First().PizzaDetails.ElementAt(i).TotalPrice, result.ReturnedObject.TotalPrices.ElementAt(i).Price);
             }
         }
 
@@ -418,27 +417,27 @@ namespace FoodOrderApp.Tests.Services
                 {
                     Id = 1,
                     Name = "Mushrooms",
-                    Prices = new List<IngredientPriceModel>
+                    IngredientDetails = new List<IngredientDetailsModel>
                     {
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 1,
                             Price = 1.00M,
                             Size = SizeEnum.Small
                         },
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 2,
                             Price = 2.00M,
                             Size = SizeEnum.Medium
                         },
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 3,
                             Price = 3.00M,
                             Size = SizeEnum.Big
                         },
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 4,
                             Price = 4.00M,
@@ -450,27 +449,27 @@ namespace FoodOrderApp.Tests.Services
                 {
                     Id = 2,
                     Name = "Cheese",
-                    Prices = new List<IngredientPriceModel>
+                    IngredientDetails = new List<IngredientDetailsModel>
                     {
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 5,
                             Price = 1.00M,
                             Size = SizeEnum.Small
                         },
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 6,
                             Price = 2.00M,
                             Size = SizeEnum.Medium
                         },
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 7,
                             Price = 3.00M,
                             Size = SizeEnum.Big
                         },
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 8,
                             Price = 4.00M,
@@ -482,27 +481,27 @@ namespace FoodOrderApp.Tests.Services
                 {
                     Id = 3,
                     Name = "Ham",
-                    Prices = new List<IngredientPriceModel>
+                    IngredientDetails = new List<IngredientDetailsModel>
                     {
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 9,
                             Price = 3.00M,
                             Size = SizeEnum.Small
                         },
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 10,
                             Price = 6.00M,
                             Size = SizeEnum.Medium
                         },
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 11,
                             Price = 7.50M,
                             Size = SizeEnum.Big
                         },
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 12,
                             Price = 9.00M,
@@ -517,28 +516,24 @@ namespace FoodOrderApp.Tests.Services
                 new StarterModel
                 {
                     Id = 1,
-                    Size = SizeEnum.Small,
                     Name = "Name1",
                     Price = 10.00M
                 },
                 new StarterModel
                 {
                     Id = 2,
-                    Size = SizeEnum.Medium,
                     Name = "Name2",
                     Price = 14.00M
                 },
                 new StarterModel
                 {
                     Id = 3,
-                    Size = SizeEnum.Big,
                     Name = "Name3",
                     Price = 18.00M
                 },
                 new StarterModel
                 {
                     Id = 4,
-                    Size = SizeEnum.Large,
                     Name = "Name4",
                     Price = 22.00M
                 }
@@ -565,64 +560,41 @@ namespace FoodOrderApp.Tests.Services
                         Ingredient = expectedIngredients[1]
                     },
                 },
-                PizzaStarters = new List<PizzaStarterModel>
+                PizzaDetails = new List<PizzaDetailsModel>
                 {
-                    new PizzaStarterModel
+                    new PizzaDetailsModel
                     {
                         PizzaId = 1,
                         StarterId = 1,
-                        Starter = expectedStarters[0]
+                        Starter = expectedStarters[0],
+                        TotalPrice = 12.00M,
+                        Size = SizeEnum.Small
                     },
-                    new PizzaStarterModel
+                    new PizzaDetailsModel
                     {
                         PizzaId = 1,
                         StarterId = 2,
-                        Starter = expectedStarters[1]
+                        Starter = expectedStarters[1],
+                        TotalPrice = 18.00M,
+                        Size = SizeEnum.Medium
                     },
-                    new PizzaStarterModel
+                    new PizzaDetailsModel
                     {
                         PizzaId = 1,
                         StarterId = 3,
-                        Starter = expectedStarters[2]
+                        Starter = expectedStarters[2],
+                        TotalPrice = 24.00M,
+                        Size = SizeEnum.Big
                     },
-                    new PizzaStarterModel
+                    new PizzaDetailsModel
                     {
                         PizzaId = 1,
                         StarterId = 4,
-                        Starter = expectedStarters[3]
-                    },
-
-                },
-                TotalPrices = new List<PizzaPriceModel>
-                {
-                    new PizzaPriceModel
-                    {
-                        Id = 1,
-                        PizzaId = 1,
-                        Price = 12.00M,
-                        Size = SizeEnum.Small
-                    },
-                    new PizzaPriceModel
-                    {
-                        Id = 2,
-                        PizzaId = 1,
-                        Price = 18.00M,
-                        Size = SizeEnum.Medium
-                    },
-                    new PizzaPriceModel
-                    {
-                        Id = 3,
-                        PizzaId = 1,
-                        Price = 24.00M,
-                        Size = SizeEnum.Big
-                    },
-                    new PizzaPriceModel
-                    {
-                        Id = 4,
-                        PizzaId = 1,
-                        Price = 30.00M,
+                        Starter = expectedStarters[3],
+                        TotalPrice = 30.00M,
                         Size = SizeEnum.Large
                     },
+
                 }
             };
 
@@ -647,7 +619,7 @@ namespace FoodOrderApp.Tests.Services
             return expectedPizzas.Where(x => x.Id == id).DefaultIfEmpty(null);
         }
 
-        private async Task<IEnumerable<StarterModel>> GetExpectedStarters() 
+        private async Task<IEnumerable<StarterModel>> GetExpectedStarters()
         {
             return expectedStarters;
         }

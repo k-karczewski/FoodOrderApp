@@ -1,8 +1,10 @@
 ﻿using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Interfaces.UnitOfWork;
+using FoodOrderApp.Models.Dtos;
+using FoodOrderApp.Models.Enums;
 using FoodOrderApp.Models.PizzaModels;
-using FoodOrderApp.Models.PizzaModels.PriceModels;
+using FoodOrderApp.Models.PizzaModels.DetailModels;
 using FoodOrderApp.Services.ServiceResults;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -31,20 +33,13 @@ namespace FoodOrderApp.Services
                 if(doesExistInDb == false)
                 {    
                     // try to add ingredient to database
-                    bool result = await _repository.Ingredients.CreateAsync(newObject);
+                    await _repository.Ingredients.CreateAsync(newObject);
 
-                    // if ingredient was added successfully
-                    if(result == true)
-                    {
-                        // save changes in database context
-                        await _repository.SaveChangesAsync();
+                    // save changes in database context
+                    await _repository.SaveChangesAsync();
 
-                        // return Ok service result with created object
-                        return new ServiceResult<IngredientModel>(ResultType.Created, newObject);
-                    }
-                
-                    // result equals false, throw exception that ingredient was not added
-                    throw new Exception("Cannot add new ingredient");
+                    // return Ok service result with created object
+                    return new ServiceResult<IngredientModel>(ResultType.Created, newObject);                 
                 }
                 else
                 {
@@ -73,20 +68,12 @@ namespace FoodOrderApp.Services
                 if (ingredientToDelete != null)
                 {
                     // try to delete it
-                    bool result = await _repository.Ingredients.DeleteAsync(ingredientToDelete);
+                    _repository.Ingredients.DeleteAsync(ingredientToDelete);
+                    // save changes in database context
+                    await _repository.SaveChangesAsync();
 
-                    // if deletion was successful
-                    if (result == true)
-                    {
-                        // save changes in database context
-                        await _repository.SaveChangesAsync();
-
-                        // return service result with Deleted status
-                        return new ServiceResult(ResultType.Deleted);
-                    }
-
-                    // if ingredient was not removed successfully throw exception with error message
-                    throw new Exception($"Cannot delete ingredient with id {ingredientId}");
+                    // return service result with Deleted status
+                    return new ServiceResult(ResultType.Deleted);                
                 }
                 else
                 {
@@ -109,7 +96,7 @@ namespace FoodOrderApp.Services
             try
             {
                 // try to get all ingredients
-                List<IngredientModel> ingredients = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id > 0, i => i.Include(p => p.Prices))).ToList();
+                List<IngredientModel> ingredients = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id > 0, i => i.Include(id => id.IngredientDetails))).ToList();
 
                 // if no exception occured during get operation return correct status 
                 return new ServiceResult<List<IngredientModel>>(ResultType.Correct, ingredients);
@@ -131,7 +118,7 @@ namespace FoodOrderApp.Services
             try
             {
                 // try to get ingredient with specific id
-                IngredientModel result = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id == id, i => i.Include(p => p.Prices))).SingleOrDefault();
+                IngredientModel result = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id == id, i => i.Include(id => id.IngredientDetails))).SingleOrDefault();
 
                 // if ingredient was found
                 if (result != null)
@@ -156,15 +143,15 @@ namespace FoodOrderApp.Services
         /// <param name="price">Defines which size of ingredient should be edited and stores new price value</param>
         /// <param name="ingredientId">identifier of ingredient that will be updated</param>
         /// <returns>Ingredient with updated price or errors (depending on result type)</returns>
-        public async Task<IServiceResult<IngredientModel>> UpdatePriceAsync(IngredientPriceModel price, int ingredientId)
+        public async Task<IServiceResult<IngredientModel>> UpdatePriceAsync(IngredientDetailsToCreateDto price, int ingredientId)
         {
             try
             {
                 // find ingredient with specific id value, include all prices of it 
-                IngredientModel ingredientToUpdate = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id == ingredientId, i => i.Include(p => p.Prices))).SingleOrDefault();
+                IngredientModel ingredientToUpdate = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id == ingredientId, i => i.Include(id => id.IngredientDetails))).SingleOrDefault();
 
                 // get price that will be updated
-                IngredientPriceModel priceToUpdate = ingredientToUpdate.Prices.SingleOrDefault(x => x.Size == price.Size);
+                IngredientDetailsModel priceToUpdate = ingredientToUpdate.IngredientDetails.SingleOrDefault(x => x.Size == price.Size);
 
                 if (priceToUpdate != null)
                 {
@@ -172,7 +159,7 @@ namespace FoodOrderApp.Services
                     priceToUpdate.Price = price.Price;
 
                     // update database entry and save context changes
-                    await _repository.Ingredients.UpdateAsync(ingredientToUpdate);
+                    _repository.Ingredients.UpdateAsync(ingredientToUpdate);
                     await _repository.SaveChangesAsync();
 
                     await UpdatePizzasPrices(ingredientId);
@@ -197,14 +184,14 @@ namespace FoodOrderApp.Services
         {
             // update price of all pizzas that include edited ingredient
             List<PizzaModel> pizzasToUpdate = (await _repository.Pizzas.GetByExpressionAsync(x => x.Id > 0,
-                i => i.Include(p => p.PizzaIngredients).ThenInclude(p => p.Ingredient).ThenInclude(p => p.Prices).Include(s => s.PizzaStarters).ThenInclude(s => s.Starter)))
+                i => i.Include(p => p.PizzaIngredients).ThenInclude(p => p.Ingredient).ThenInclude(p => p.IngredientDetails).Include(p => p.PizzaDetails).ThenInclude(s => s.Starter)))
                                                 .Where(p => p.PizzaIngredients.Any(x => x.IngredientId == ingredientId)).ToList();
             if (pizzasToUpdate.Count > 0)
             {
                 foreach (PizzaModel pizza in pizzasToUpdate)
                 {
-                    pizza.TotalPrices = CountTotalPizzaPrice(pizza);
-                    await _repository.Pizzas.UpdateAsync(pizza);
+                    UpdateTotalPizzaPrices(pizza);
+                    _repository.Pizzas.UpdateAsync(pizza);
                 }
 
                 // save context changes

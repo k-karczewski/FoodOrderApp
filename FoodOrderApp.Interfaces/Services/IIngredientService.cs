@@ -1,6 +1,7 @@
 ﻿using FoodOrderApp.Interfaces.Services.ServiceResults;
+using FoodOrderApp.Models.Dtos;
 using FoodOrderApp.Models.PizzaModels;
-using FoodOrderApp.Models.PizzaModels.PriceModels;
+using FoodOrderApp.Models.PizzaModels.DetailModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace FoodOrderApp.Interfaces.Services
 {
-    public interface IIngredientService : IFoodService<IngredientModel>
+    public interface IIngredientService : IFoodService
     {
         /// <summary>
         /// Creates new object in database
@@ -29,6 +30,13 @@ namespace FoodOrderApp.Interfaces.Services
         /// <param name="price">new object data</param>
         /// <param name="ingredientId">id of ingredient which price will be updated</param>
         /// <returns>Updated ingredient or list of errors</returns>
-        Task<IServiceResult<IngredientModel>> UpdatePriceAsync(IngredientPriceModel price, int ingredientId);
+        Task<IServiceResult<IngredientModel>> UpdatePriceAsync(IngredientDetailsToCreateDto price, int ingredientId);
+
+        /// <summary>
+        /// Gets Ingredient object with specific id
+        /// </summary>
+        /// <param name="id">id of ingredient</param>
+        /// <returns>IServiceResult with operation status, T objects from database</returns>
+        Task<IServiceResult<IngredientModel>> GetByIdAsync(int id);
     }
 }

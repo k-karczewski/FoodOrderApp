@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FoodOrderApp.Interfaces.Services
 {
-    public interface IPizzaService : IFoodService<PizzaModel>
+    public interface IPizzaService : IFoodService
     {
 
         /// <summary>
@@ -53,5 +53,12 @@ namespace FoodOrderApp.Interfaces.Services
         /// <param name="ingredientId">identifier of ingredient</param>
         /// <returns>PizzaToReturn object or list of errors</returns>
         Task<IServiceResult<PizzaToReturnDto>> DeleteIngredientAsync(string pizzaName, int ingredientId);
+
+        /// <summary>
+        /// Gets Pizza object with specific id
+        /// </summary>
+        /// <param name="id">id of pizza</param>
+        /// <returns>IServiceResult with operation status, T objects from database</returns>
+        Task<IServiceResult<PizzaToReturnDto>> GetByIdAsync(int id);
     }
 }

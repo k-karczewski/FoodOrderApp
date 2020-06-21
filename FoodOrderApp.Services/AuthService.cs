@@ -3,6 +3,7 @@ using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Interfaces.UnitOfWork;
 using FoodOrderApp.Models.Dtos;
+using FoodOrderApp.Models.Enums;
 using FoodOrderApp.Models.UserModels;
 using FoodOrderApp.Providers;
 using FoodOrderApp.Services.ServiceResults;

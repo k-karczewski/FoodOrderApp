@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace FoodOrderApp.Data.Migrations
 {
-    public partial class IdentityInitial : Migration
+    public partial class ReworkedDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -13,7 +13,7 @@ namespace FoodOrderApp.Data.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -55,8 +55,7 @@ namespace FoodOrderApp.Data.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(nullable: true),
-                    Size = table.Column<int>(nullable: false),
-                    Price = table.Column<decimal>(nullable: false)
+                    Price = table.Column<decimal>(type: "decimal(4,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -90,7 +89,7 @@ namespace FoodOrderApp.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "IngredientPrices",
+                name: "IngredientDetails",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -101,11 +100,32 @@ namespace FoodOrderApp.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_IngredientPrices", x => x.Id);
+                    table.PrimaryKey("PK_IngredientDetails", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_IngredientPrices_Ingredients_IngredientId",
+                        name: "FK_IngredientDetails_Ingredients_IngredientId",
                         column: x => x.IngredientId,
                         principalTable: "Ingredients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Photos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Url = table.Column<string>(nullable: true),
+                    PublicId = table.Column<string>(nullable: true),
+                    PizzaId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Photos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Photos_Pizzas_PizzaId",
+                        column: x => x.PizzaId,
+                        principalTable: "Pizzas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -135,27 +155,6 @@ namespace FoodOrderApp.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PizzaPriceModel",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Size = table.Column<int>(nullable: false),
-                    Price = table.Column<decimal>(nullable: false),
-                    PizzaId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PizzaPriceModel", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PizzaPriceModel_Pizzas_PizzaId",
-                        column: x => x.PizzaId,
-                        principalTable: "Pizzas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "RoleClaims",
                 columns: table => new
                 {
@@ -177,25 +176,50 @@ namespace FoodOrderApp.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PizzaStarters",
+                name: "PizzaDetails",
                 columns: table => new
                 {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TotalPrice = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
+                    Size = table.Column<int>(nullable: false),
                     PizzaId = table.Column<int>(nullable: false),
                     StarterId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PizzaStarters", x => new { x.PizzaId, x.StarterId });
+                    table.PrimaryKey("PK_PizzaDetails", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PizzaStarters_Pizzas_PizzaId",
+                        name: "FK_PizzaDetails_Pizzas_PizzaId",
                         column: x => x.PizzaId,
                         principalTable: "Pizzas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PizzaStarters_Starters_StarterId",
+                        name: "FK_PizzaDetails_Starters_StarterId",
                         column: x => x.StarterId,
                         principalTable: "Starters",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TotalPrice = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
+                    UserId = table.Column<int>(nullable: false),
+                    Status = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Orders_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -285,10 +309,56 @@ namespace FoodOrderApp.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "PizzaOrders",
+                columns: table => new
+                {
+                    DetailId = table.Column<int>(nullable: false),
+                    OrderId = table.Column<int>(nullable: false),
+                    PizzaDetailId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PizzaOrders", x => new { x.DetailId, x.OrderId });
+                    table.ForeignKey(
+                        name: "FK_PizzaOrders_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PizzaOrders_PizzaDetails_PizzaDetailId",
+                        column: x => x.PizzaDetailId,
+                        principalTable: "PizzaDetails",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_IngredientPrices_IngredientId",
-                table: "IngredientPrices",
+                name: "IX_IngredientDetails_IngredientId",
+                table: "IngredientDetails",
                 column: "IngredientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_UserId",
+                table: "Orders",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Photos_PizzaId",
+                table: "Photos",
+                column: "PizzaId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PizzaDetails_PizzaId",
+                table: "PizzaDetails",
+                column: "PizzaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PizzaDetails_StarterId",
+                table: "PizzaDetails",
+                column: "StarterId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PizzaIngredients_IngredientId",
@@ -296,14 +366,14 @@ namespace FoodOrderApp.Data.Migrations
                 column: "IngredientId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PizzaPriceModel_PizzaId",
-                table: "PizzaPriceModel",
-                column: "PizzaId");
+                name: "IX_PizzaOrders_OrderId",
+                table: "PizzaOrders",
+                column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PizzaStarters_StarterId",
-                table: "PizzaStarters",
-                column: "StarterId");
+                name: "IX_PizzaOrders_PizzaDetailId",
+                table: "PizzaOrders",
+                column: "PizzaDetailId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoleClaims_RoleId",
@@ -348,16 +418,16 @@ namespace FoodOrderApp.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "IngredientPrices");
+                name: "IngredientDetails");
+
+            migrationBuilder.DropTable(
+                name: "Photos");
 
             migrationBuilder.DropTable(
                 name: "PizzaIngredients");
 
             migrationBuilder.DropTable(
-                name: "PizzaPriceModel");
-
-            migrationBuilder.DropTable(
-                name: "PizzaStarters");
+                name: "PizzaOrders");
 
             migrationBuilder.DropTable(
                 name: "RoleClaims");
@@ -378,16 +448,22 @@ namespace FoodOrderApp.Data.Migrations
                 name: "Ingredients");
 
             migrationBuilder.DropTable(
-                name: "Pizzas");
+                name: "Orders");
 
             migrationBuilder.DropTable(
-                name: "Starters");
+                name: "PizzaDetails");
 
             migrationBuilder.DropTable(
                 name: "Roles");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Pizzas");
+
+            migrationBuilder.DropTable(
+                name: "Starters");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FoodOrderApp.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,15 +16,5 @@ namespace FoodOrderApp.Interfaces.Services.ServiceResults
         ResultType Result { get; set; }
         TReturn ReturnedObject { get; set; }
         ICollection<string> Errors { get; set; }
-    }
-
-    public enum ResultType
-    {
-        Correct,
-        Error,
-        Created,
-        Edited,
-        Deleted,
-        Unauthorized
     }
 }

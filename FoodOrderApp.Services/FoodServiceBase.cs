@@ -1,15 +1,7 @@
-﻿using FoodOrderApp.Interfaces.Repositories;
-using FoodOrderApp.Interfaces.Services;
-using FoodOrderApp.Interfaces.Services.ServiceResults;
-using FoodOrderApp.Interfaces.UnitOfWork;
+﻿using FoodOrderApp.Interfaces.UnitOfWork;
 using FoodOrderApp.Models.PizzaModels;
-using FoodOrderApp.Models.PizzaModels.PriceModels;
-using FoodOrderApp.Services.ServiceResults;
-using System;
-using System.Collections.Generic;
+using FoodOrderApp.Models.PizzaModels.DetailModels;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FoodOrderApp.Services
 {
@@ -23,42 +15,27 @@ namespace FoodOrderApp.Services
         }
 
         /// <summary>
-        /// Counts total price of pizza
+        /// Counts total prices of pizza
         /// </summary>
-        /// <param name="pizza">data of pizza that total price will be counted for</param>
+        /// <param name="pizza">data of pizza that total prices will be counted for</param>
         /// <returns>Total price of pizza (including starter and all ingredients)</returns>
-        protected ICollection<PizzaPriceModel> CountTotalPizzaPrice(PizzaModel pizza)
+        protected void UpdateTotalPizzaPrices(PizzaModel pizza)
         {
-            List<decimal> prices = new List<decimal>();
             decimal total = 0;
-            foreach (PizzaStarterModel pizzaStarter in pizza.PizzaStarters)
+            foreach (PizzaDetailsModel pizzaDetails in pizza.PizzaDetails)
             {
                 // get starter price
-                total = pizzaStarter.Starter.Price;
+                total = pizzaDetails.Starter.Price;
 
                 // add ingredients prices
                 foreach (PizzaIngredientsModel pizzaIngredient in pizza.PizzaIngredients)
                 {
                     // sum all prices
-                    total += pizzaIngredient.Ingredient.Prices.SingleOrDefault(p => p.Size == pizzaStarter.Starter.Size).Price;
+                    total += pizzaIngredient.Ingredient.IngredientDetails.SingleOrDefault(p => p.Size == pizzaDetails.Size).Price;
                 }
 
-                prices.Add(total);
+                pizzaDetails.TotalPrice = total;
             }
-
-            pizza.TotalPrices = new List<PizzaPriceModel>();
-
-            for(int i = 0; i < prices.Count; i++)
-            {
-                pizza.TotalPrices.Add(new PizzaPriceModel
-                {
-                    Size = (SizeEnum)i,
-                    Price = prices[i]
-                });
-            }
-
-            // return total prices
-            return pizza.TotalPrices;
         }
     }
 }

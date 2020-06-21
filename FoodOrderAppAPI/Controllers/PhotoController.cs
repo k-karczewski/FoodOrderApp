@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Models.Dtos;
+using FoodOrderApp.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

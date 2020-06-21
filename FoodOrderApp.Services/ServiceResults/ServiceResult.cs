@@ -1,7 +1,6 @@
 ﻿using FoodOrderApp.Interfaces.Services.ServiceResults;
-using System;
+using FoodOrderApp.Models.Enums;
 using System.Collections.Generic;
-using System.Text;
 
 namespace FoodOrderApp.Services.ServiceResults
 {

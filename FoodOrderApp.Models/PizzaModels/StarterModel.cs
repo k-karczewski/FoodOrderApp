@@ -1,7 +1,5 @@
-﻿using FoodOrderApp.Models.PizzaModels.PriceModels;
-using System;
+﻿using FoodOrderApp.Models.PizzaModels.DetailModels;
 using System.Collections.Generic;
-using System.Text;
 
 namespace FoodOrderApp.Models.PizzaModels
 {
@@ -9,9 +7,8 @@ namespace FoodOrderApp.Models.PizzaModels
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public SizeEnum Size { get; set; }
         public decimal Price { get; set; }
 
-        public ICollection<PizzaStarterModel> PizzaStarters { get; set; }
+        public ICollection<PizzaDetailsModel> Pizzas { get; set; }
     }
 }

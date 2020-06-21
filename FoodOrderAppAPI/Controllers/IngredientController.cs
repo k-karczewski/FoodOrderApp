@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using FoodOrderApp.Interfaces.Repositories;
 using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
+using FoodOrderApp.Models.Dtos;
+using FoodOrderApp.Models.Enums;
 using FoodOrderApp.Models.PizzaModels;
-using FoodOrderApp.Models.PizzaModels.PriceModels;
+using FoodOrderApp.Models.PizzaModels.DetailModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodOrderAppAPI.Controllers
@@ -57,31 +55,45 @@ namespace FoodOrderAppAPI.Controllers
         [Route("create")]
         public async Task<IActionResult> CreateIngredient(IngredientModel ingredient)
         {
-            IServiceResult<IngredientModel> result = await _service.CreateAsync(ingredient);
-
-            if(result.Result == ResultType.Created)
+            if (ModelState.IsValid)
             {
-                return CreatedAtRoute("GetIngedientById", new { id = result.ReturnedObject.Id }, result.ReturnedObject);
+                IServiceResult<IngredientModel> result = await _service.CreateAsync(ingredient);
+
+                if(result.Result == ResultType.Created)
+                {
+                    return CreatedAtRoute("GetIngedientById", new { id = result.ReturnedObject.Id }, result.ReturnedObject);
+                }
+                else
+                {
+                    return BadRequest(result.Errors);
+                }
             }
             else
             {
-                return BadRequest(result.Errors);
+                return BadRequest("Received incorrect input data");
             }
         }
 
         [HttpPut]
         [Route("change-price/{ingredientId}")]
-        public async Task<IActionResult> ChangePrice(IngredientPriceModel price, int ingredientId)
+        public async Task<IActionResult> ChangePrice(IngredientDetailsToCreateDto price, int ingredientId)
         {
-            IServiceResult<IngredientModel> result = await _service.UpdatePriceAsync(price, ingredientId);
-
-            if(result.Result == ResultType.Edited)
+            if(ModelState.IsValid)
             {
-                return CreatedAtRoute("GetIngedientById", new { id = result.ReturnedObject.Id }, result.ReturnedObject);
+                IServiceResult<IngredientModel> result = await _service.UpdatePriceAsync(price, ingredientId);
+
+                if (result.Result == ResultType.Edited)
+                {
+                    return CreatedAtRoute("GetIngedientById", new { id = result.ReturnedObject.Id }, result.ReturnedObject);
+                }
+                else
+                {
+                    return BadRequest(result.Errors);
+                }
             }
             else
             {
-                return BadRequest(result.Errors);
+                return BadRequest();
             }
         }
 

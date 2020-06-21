@@ -20,33 +20,19 @@ namespace FoodOrderApp.Data.Repositories
             _dbSet = context.Set<TEntity>();
         }
 
-        public async Task<bool> CreateAsync(TEntity newObject)
+        public async Task CreateAsync(TEntity newObject)
         {
-            var entity = _dbSet.Attach(newObject);
             await _dbSet.AddAsync(newObject);
-           
-            if (entity.State == EntityState.Added)
-            {
-                return true;
-            }
-            else
-            {
-                throw new Exception("Object cannot be created");
-            }
         }
 
-        public async Task<bool> DeleteAsync(TEntity objectToDelete)
+        public void DeleteAsync(TEntity objectToDelete)
         {
+            _dbSet.Remove(objectToDelete);
+        }
 
-            if (objectToDelete != null)
-            {
-               _dbSet.Remove(objectToDelete);
-               return true;
-            }
-            else
-            {
-                throw new Exception("Object cannot be deleted");
-            } 
+        public void UpdateAsync(TEntity editedObject)
+        {
+            _dbSet.Update(editedObject);
         }
 
         public async Task<IEnumerable<TEntity>> GetByExpressionAsync(Expression<Func<TEntity, bool>> selector = null, 
@@ -65,26 +51,6 @@ namespace FoodOrderApp.Data.Repositories
             }
 
             return query;
-        }
-
-        public async Task<bool> UpdateAsync(TEntity editedObject)
-        {
-            _dbSet.Update(editedObject);
-
-            return true; 
-        }
-
-
-        private async Task<TEntity> GetByIdAsync(int id)
-        {
-            TEntity objectFromDb = await _dbSet.FindAsync(id);
-            
-            if(objectFromDb == null)
-            {
-                throw new Exception("Object has not been found");
-            }
-
-            return objectFromDb; 
         }
     }
 }

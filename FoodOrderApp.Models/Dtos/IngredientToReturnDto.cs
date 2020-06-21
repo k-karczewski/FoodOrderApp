@@ -1,13 +1,9 @@
-﻿using FoodOrderApp.Models.PizzaModels.PriceModels;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace FoodOrderApp.Models.Dtos
 {
     public class IngredientToReturnDto
     {
         public string Name { get; set; }
-        public ICollection<PriceToReturnDto> Prices { get; set; }
     }
 }

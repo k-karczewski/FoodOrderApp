@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Models.Dtos;
+using FoodOrderApp.Models.Enums;
 using FoodOrderApp.Models.PizzaModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -56,7 +57,7 @@ namespace FoodOrderAppAPI.Controllers
         [HttpGet("{id}", Name = "GetPizzaById")]
         public async Task<IActionResult> GetById(int id)
         {
-            IServiceResult<PizzaModel> result = await _service.GetByIdAsync(id);
+            IServiceResult<PizzaToReturnDto> result = await _service.GetByIdAsync(id);
 
             if (result.Result == ResultType.Correct)
             {

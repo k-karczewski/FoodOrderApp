@@ -1,8 +1,6 @@
-﻿using FoodOrderApp.Models.PizzaModels.PhotoModels;
-using FoodOrderApp.Models.PizzaModels.PriceModels;
-using System;
+﻿using FoodOrderApp.Models.PizzaModels.DetailModels;
+using FoodOrderApp.Models.PizzaModels.PhotoModels;
 using System.Collections.Generic;
-using System.Text;
 
 namespace FoodOrderApp.Models.PizzaModels
 {
@@ -10,9 +8,9 @@ namespace FoodOrderApp.Models.PizzaModels
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public ICollection<PizzaPriceModel> TotalPrices { get; set; }
 
-        public ICollection<PizzaStarterModel> PizzaStarters { get; set; }
+        public ICollection<PizzaDetailsModel> PizzaDetails { get; set; }
+
         public ICollection<PizzaIngredientsModel> PizzaIngredients { get; set; }
 
         public PhotoModel Photo { get; set; }

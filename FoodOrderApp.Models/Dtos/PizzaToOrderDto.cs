@@ -2,9 +2,9 @@
 
 namespace FoodOrderApp.Models.Dtos
 {
-    public class PriceToReturnDto
+    public class PizzaToOrderDto
     {
+        public int PizzaId { get; set; }
         public SizeEnum Size { get; set; }
-        public decimal Price { get; set; }
     }
 }

@@ -1,12 +1,13 @@
 ﻿using FoodOrderApp.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace FoodOrderApp.Models.Dtos
 {
-    public class StarterToReturnDto
+    public class IngredientDetailsToCreateDto
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
+        [Required]
         public SizeEnum Size { get; set; }
+        [Required]
         public decimal Price { get; set; }
     }
 }

@@ -2,8 +2,10 @@
 using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Interfaces.UnitOfWork;
+using FoodOrderApp.Models.Dtos;
+using FoodOrderApp.Models.Enums;
 using FoodOrderApp.Models.PizzaModels;
-using FoodOrderApp.Models.PizzaModels.PriceModels;
+using FoodOrderApp.Models.PizzaModels.DetailModels;
 using FoodOrderApp.Services;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -35,15 +37,15 @@ namespace FoodOrderApp.Tests.Services
                 {
                     Id = 1,
                     Name = "Cheese",
-                    Prices = new List<IngredientPriceModel>
+                    IngredientDetails = new List<IngredientDetailsModel>
                     {
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 1,
                             Price = 1.00M,
                             Size = SizeEnum.Small
                         },
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 2,
                             Price = 2.00M,
@@ -55,15 +57,15 @@ namespace FoodOrderApp.Tests.Services
                 {
                     Id = 2,
                     Name = "Mushrooms",
-                    Prices = new List<IngredientPriceModel>
+                    IngredientDetails = new List<IngredientDetailsModel>
                     {
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 3,
                             Price = 5.00M,
                             Size = SizeEnum.Small
                         },
-                        new IngredientPriceModel
+                        new IngredientDetailsModel
                         {
                             Id = 4,
                             Price = 10.00M,
@@ -80,7 +82,7 @@ namespace FoodOrderApp.Tests.Services
             int idOfIngredient = 1;
 
             // mock getByExpression method from repository            
-            repoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<IngredientModel, bool>>>(), 
+            repoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<IngredientModel, bool>>>(),
                                                        It.IsAny<Func<IQueryable<IngredientModel>, IIncludableQueryable<IngredientModel, object>>>())).
                                                        Returns(GetFakeIngredientById(idOfIngredient));
 
@@ -94,7 +96,7 @@ namespace FoodOrderApp.Tests.Services
 
             Assert.AreEqual(ResultType.Correct, result.Result);
             Assert.AreEqual(expectedIngredients[0].Id, result.ReturnedObject.Id);
-            Assert.AreEqual(expectedIngredients[0].Name, result.ReturnedObject.Name); 
+            Assert.AreEqual(expectedIngredients[0].Name, result.ReturnedObject.Name);
         }
 
         [TestMethod]
@@ -157,7 +159,7 @@ namespace FoodOrderApp.Tests.Services
             IIngredientService ingredientService = new IngredientService(uowMock.Object);
 
             IServiceResult<IngredientModel> result = await ingredientService.CreateAsync(newIngredient);
-            
+
             Assert.AreEqual(ResultType.Created, result.Result);
             Assert.IsNotNull(result.ReturnedObject);
             Assert.AreEqual(newIngredient.Id, result.ReturnedObject.Id);
@@ -193,7 +195,7 @@ namespace FoodOrderApp.Tests.Services
         public async Task DeleteExistingIngredient()
         {
             repoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<IngredientModel, bool>>>(), null)).Returns(GetFakeIngredientByName(expectedIngredients[0].Name));
-            repoMock.Setup(x => x.DeleteAsync(expectedIngredients[0])).Returns(Task.FromResult(true));
+            repoMock.Setup(x => x.DeleteAsync(expectedIngredients[0]));
 
             uowMock.Setup(x => x.Ingredients).Returns(repoMock.Object);
 
@@ -232,9 +234,8 @@ namespace FoodOrderApp.Tests.Services
         {
             int idOfIngredient = 1;
             PizzaModel pizza = (await GetFakePizzas()).First();
-            IngredientPriceModel newPrice = new IngredientPriceModel
+            IngredientDetailsToCreateDto newPrice = new IngredientDetailsToCreateDto
             {
-                Id = 1,
                 Size = SizeEnum.Small,
                 Price = 5.50M
             };
@@ -245,13 +246,13 @@ namespace FoodOrderApp.Tests.Services
                                            It.IsAny<Func<IQueryable<IngredientModel>, IIncludableQueryable<IngredientModel, object>>>())).
                                            Returns(GetFakeIngredientById(idOfIngredient));
 
-            repoMock.Setup(x => x.UpdateAsync(expectedIngredients[idOfIngredient])).Returns(Task.FromResult(true));
-  
+            repoMock.Setup(x => x.UpdateAsync(expectedIngredients[idOfIngredient]));
+
             pizzaRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<PizzaModel, bool>>>(),
                                            It.IsAny<Func<IQueryable<PizzaModel>, IIncludableQueryable<PizzaModel, object>>>())).
                                            Returns(GetFakePizzas());
-          
-            pizzaRepoMock.Setup(x => x.UpdateAsync(pizza)).Returns(Task.FromResult(true));
+
+            pizzaRepoMock.Setup(x => x.UpdateAsync(pizza));
 
 
             uowMock.Setup(x => x.Ingredients).Returns(repoMock.Object);
@@ -261,12 +262,12 @@ namespace FoodOrderApp.Tests.Services
             IIngredientService ingredientService = new IngredientService(uowMock.Object);
 
             IServiceResult<IngredientModel> result = await ingredientService.UpdatePriceAsync(newPrice, idOfIngredient);
-            
+
             uowMock.Verify(x => x.SaveChangesAsync(), Times.Exactly(2));
 
             Assert.AreEqual(ResultType.Edited, result.Result);
             Assert.IsNotNull(result.ReturnedObject);
-            Assert.AreEqual(newPrice.Price, result.ReturnedObject.Prices.Where(x => x.Size == SizeEnum.Small).SingleOrDefault().Price);
+            Assert.AreEqual(newPrice.Price, result.ReturnedObject.IngredientDetails.Where(x => x.Size == SizeEnum.Small).SingleOrDefault().Price);
         }
 
 
@@ -301,16 +302,16 @@ namespace FoodOrderApp.Tests.Services
                         {
                             Id = 1,
                             Name = "ham",
-                            Prices = new List<IngredientPriceModel>
+                            IngredientDetails = new List<IngredientDetailsModel>
                             {
-                                new IngredientPriceModel
+                                new IngredientDetailsModel
                                 {
                                     Id = 1,
                                     IngredientId = 1,
                                     Size = SizeEnum.Small,
                                     Price = 2.00M
                                 },
-                                new IngredientPriceModel
+                                new IngredientDetailsModel
                                 {
                                     Id = 2,
                                     IngredientId = 1,
@@ -328,16 +329,16 @@ namespace FoodOrderApp.Tests.Services
                         {
                             Id = 2,
                             Name = "mushrooms",
-                            Prices = new List<IngredientPriceModel>
+                            IngredientDetails = new List<IngredientDetailsModel>
                             {
-                                new IngredientPriceModel
+                                new IngredientDetailsModel
                                 {
                                     Id = 3,
                                     IngredientId = 2,
                                     Size = SizeEnum.Small,
                                     Price = 3.00M
                                 },
-                                new IngredientPriceModel
+                                new IngredientDetailsModel
                                 {
                                     Id = 4,
                                     IngredientId = 2,
@@ -348,9 +349,9 @@ namespace FoodOrderApp.Tests.Services
                         }
                     }
                 },
-                PizzaStarters = new List<PizzaStarterModel>
+                PizzaDetails = new List<PizzaDetailsModel>
                 {
-                    new PizzaStarterModel
+                    new PizzaDetailsModel
                     {
                         PizzaId = 1,
                         StarterId = 1,
@@ -358,11 +359,10 @@ namespace FoodOrderApp.Tests.Services
                         {
                             Id = 1,
                             Name = "Starter1",
-                            Size = SizeEnum.Small,
                             Price = 15.00M
                         }
                     },
-                    new PizzaStarterModel
+                    new PizzaDetailsModel
                     {
                         PizzaId = 1,
                         StarterId = 2,
@@ -370,13 +370,12 @@ namespace FoodOrderApp.Tests.Services
                         {
                             Id = 2,
                             Name = "Starter2",
-                            Size = SizeEnum.Big,
                             Price = 25.00M
                         }
                     }
                 }
             };
-            
+
             return new List<PizzaModel> { pizza };
         }
     }

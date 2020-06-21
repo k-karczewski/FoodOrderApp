@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FoodOrderApp.Data.Migrations
 {
     [DbContext(typeof(FoodOrderContext))]
-    [Migration("20200526165057_IdentityInitial")]
-    partial class IdentityInitial
+    [Migration("20200619183304_ReworkedDatabase")]
+    partial class ReworkedDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,6 +21,80 @@ namespace FoodOrderApp.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("FoodOrderApp.Models.OrderModels.OrderModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(4,2)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.DetailModels.IngredientDetailsModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("IngredientId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(4,2)");
+
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IngredientId");
+
+                    b.ToTable("IngredientDetails");
+                });
+
+            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.DetailModels.PizzaDetailsModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("PizzaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StarterId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(4,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PizzaId");
+
+                    b.HasIndex("StarterId");
+
+                    b.ToTable("PizzaDetails");
+                });
+
             modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.IngredientModel", b =>
                 {
                     b.Property<int>("Id")
@@ -29,11 +103,36 @@ namespace FoodOrderApp.Data.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Ingredients");
+                });
+
+            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PhotoModels.PhotoModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("PizzaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PublicId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PizzaId")
+                        .IsUnique();
+
+                    b.ToTable("Photos");
                 });
 
             modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PizzaIngredientsModel", b =>
@@ -66,65 +165,24 @@ namespace FoodOrderApp.Data.Migrations
                     b.ToTable("Pizzas");
                 });
 
-            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PizzaStarterModel", b =>
+            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PizzaOrderModel", b =>
                 {
-                    b.Property<int>("PizzaId")
+                    b.Property<int>("DetailId")
                         .HasColumnType("int");
 
-                    b.Property<int>("StarterId")
+                    b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    b.HasKey("PizzaId", "StarterId");
-
-                    b.HasIndex("StarterId");
-
-                    b.ToTable("PizzaStarters");
-                });
-
-            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PriceModels.IngredientPriceModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("IngredientId")
+                    b.Property<int?>("PizzaDetailId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(4,2)");
+                    b.HasKey("DetailId", "OrderId");
 
-                    b.Property<int>("Size")
-                        .HasColumnType("int");
+                    b.HasIndex("OrderId");
 
-                    b.HasKey("Id");
+                    b.HasIndex("PizzaDetailId");
 
-                    b.HasIndex("IngredientId");
-
-                    b.ToTable("IngredientPrices");
-                });
-
-            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PriceModels.PizzaPriceModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("PizzaId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Size")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PizzaId");
-
-                    b.ToTable("PizzaPriceModel");
+                    b.ToTable("PizzaOrders");
                 });
 
             modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.StarterModel", b =>
@@ -138,10 +196,7 @@ namespace FoodOrderApp.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Size")
-                        .HasColumnType("int");
+                        .HasColumnType("decimal(4,2)");
 
                     b.HasKey("Id");
 
@@ -345,6 +400,48 @@ namespace FoodOrderApp.Data.Migrations
                     b.ToTable("UserTokens");
                 });
 
+            modelBuilder.Entity("FoodOrderApp.Models.OrderModels.OrderModel", b =>
+                {
+                    b.HasOne("FoodOrderApp.Models.UserModels.UserModel", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.DetailModels.IngredientDetailsModel", b =>
+                {
+                    b.HasOne("FoodOrderApp.Models.PizzaModels.IngredientModel", "Ingredient")
+                        .WithMany("IngredientDetails")
+                        .HasForeignKey("IngredientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.DetailModels.PizzaDetailsModel", b =>
+                {
+                    b.HasOne("FoodOrderApp.Models.PizzaModels.PizzaModel", "Pizza")
+                        .WithMany("PizzaDetails")
+                        .HasForeignKey("PizzaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FoodOrderApp.Models.PizzaModels.StarterModel", "Starter")
+                        .WithMany("Pizzas")
+                        .HasForeignKey("StarterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PhotoModels.PhotoModel", b =>
+                {
+                    b.HasOne("FoodOrderApp.Models.PizzaModels.PizzaModel", "Pizza")
+                        .WithOne("Photo")
+                        .HasForeignKey("FoodOrderApp.Models.PizzaModels.PhotoModels.PhotoModel", "PizzaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PizzaIngredientsModel", b =>
                 {
                     b.HasOne("FoodOrderApp.Models.PizzaModels.IngredientModel", "Ingredient")
@@ -360,37 +457,17 @@ namespace FoodOrderApp.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PizzaStarterModel", b =>
+            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PizzaOrderModel", b =>
                 {
-                    b.HasOne("FoodOrderApp.Models.PizzaModels.PizzaModel", "Pizza")
-                        .WithMany("PizzaStarters")
-                        .HasForeignKey("PizzaId")
+                    b.HasOne("FoodOrderApp.Models.OrderModels.OrderModel", "Order")
+                        .WithMany("PizzaOrders")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FoodOrderApp.Models.PizzaModels.StarterModel", "Starter")
-                        .WithMany("PizzaStarters")
-                        .HasForeignKey("StarterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PriceModels.IngredientPriceModel", b =>
-                {
-                    b.HasOne("FoodOrderApp.Models.PizzaModels.IngredientModel", "Ingredient")
-                        .WithMany("Prices")
-                        .HasForeignKey("IngredientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PriceModels.PizzaPriceModel", b =>
-                {
-                    b.HasOne("FoodOrderApp.Models.PizzaModels.PizzaModel", "Pizza")
-                        .WithMany("TotalPrices")
-                        .HasForeignKey("PizzaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("FoodOrderApp.Models.PizzaModels.DetailModels.PizzaDetailsModel", "PizzaDetail")
+                        .WithMany("PizzaOrders")
+                        .HasForeignKey("PizzaDetailId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

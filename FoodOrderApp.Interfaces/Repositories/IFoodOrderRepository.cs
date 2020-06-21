@@ -10,9 +10,9 @@ namespace FoodOrderApp.Interfaces.Repositories
 {
     public interface IFoodOrderRepository<TEntity> where TEntity : class
     {
-        Task<bool> CreateAsync(TEntity newObject);
-        Task<bool> DeleteAsync(TEntity objectToDelete);
-        Task<bool> UpdateAsync(TEntity editedObject);
+        Task CreateAsync(TEntity newObject);
+        void DeleteAsync(TEntity objectToDelete);
+        void UpdateAsync(TEntity editedObject);
         Task<IEnumerable<TEntity>> GetByExpressionAsync(Expression<Func<TEntity, bool>> selector = null, 
                                            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> include = null);
 
