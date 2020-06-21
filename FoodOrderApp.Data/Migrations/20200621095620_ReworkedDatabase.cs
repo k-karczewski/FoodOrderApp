@@ -313,13 +313,13 @@ namespace FoodOrderApp.Data.Migrations
                 name: "PizzaOrders",
                 columns: table => new
                 {
-                    DetailId = table.Column<int>(nullable: false),
-                    OrderId = table.Column<int>(nullable: false),
-                    PizzaDetailId = table.Column<int>(nullable: true)
+                    PizzaId = table.Column<int>(nullable: false),
+                    PizzaDetailId = table.Column<int>(nullable: false),
+                    OrderId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PizzaOrders", x => new { x.DetailId, x.OrderId });
+                    table.PrimaryKey("PK_PizzaOrders", x => new { x.PizzaDetailId, x.OrderId, x.PizzaId });
                     table.ForeignKey(
                         name: "FK_PizzaOrders_Orders_OrderId",
                         column: x => x.OrderId,
@@ -331,7 +331,7 @@ namespace FoodOrderApp.Data.Migrations
                         column: x => x.PizzaDetailId,
                         principalTable: "PizzaDetails",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -369,11 +369,6 @@ namespace FoodOrderApp.Data.Migrations
                 name: "IX_PizzaOrders_OrderId",
                 table: "PizzaOrders",
                 column: "OrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PizzaOrders_PizzaDetailId",
-                table: "PizzaOrders",
-                column: "PizzaDetailId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoleClaims_RoleId",

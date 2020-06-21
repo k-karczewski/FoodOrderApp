@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FoodOrderApp.Data.Migrations
 {
     [DbContext(typeof(FoodOrderContext))]
-    [Migration("20200619183304_ReworkedDatabase")]
+    [Migration("20200621095620_ReworkedDatabase")]
     partial class ReworkedDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -167,20 +167,18 @@ namespace FoodOrderApp.Data.Migrations
 
             modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PizzaOrderModel", b =>
                 {
-                    b.Property<int>("DetailId")
+                    b.Property<int>("PizzaDetailId")
                         .HasColumnType("int");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PizzaDetailId")
+                    b.Property<int>("PizzaId")
                         .HasColumnType("int");
 
-                    b.HasKey("DetailId", "OrderId");
+                    b.HasKey("PizzaDetailId", "OrderId", "PizzaId");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("PizzaDetailId");
 
                     b.ToTable("PizzaOrders");
                 });
@@ -467,7 +465,9 @@ namespace FoodOrderApp.Data.Migrations
 
                     b.HasOne("FoodOrderApp.Models.PizzaModels.DetailModels.PizzaDetailsModel", "PizzaDetail")
                         .WithMany("PizzaOrders")
-                        .HasForeignKey("PizzaDetailId");
+                        .HasForeignKey("PizzaDetailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

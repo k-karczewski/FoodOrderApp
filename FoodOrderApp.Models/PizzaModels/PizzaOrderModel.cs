@@ -5,7 +5,9 @@ namespace FoodOrderApp.Models.PizzaModels
 {
     public class PizzaOrderModel
     {
-        public int DetailId { get; set; }
+        public int PizzaId { get; set; }
+
+        public int PizzaDetailId { get; set; }
         public PizzaDetailsModel PizzaDetail { get; set; }
 
         public int OrderId { get; set; }

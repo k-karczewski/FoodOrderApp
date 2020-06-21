@@ -121,8 +121,9 @@ namespace FoodOrderApp.Services
                     {
                         order.Add(new PizzaOrderModel
                         {
-                            DetailId = pizzaToOrder.PizzaDetails.FirstOrDefault().Id,
-                            PizzaDetail = pizzaToOrder.PizzaDetails.FirstOrDefault()
+                            PizzaDetailId = pizzaToOrder.PizzaDetails.FirstOrDefault().Id,
+                            PizzaDetail = pizzaToOrder.PizzaDetails.FirstOrDefault(),
+                            PizzaId = pizzaToOrder.Id
                         });
                     }
                     else

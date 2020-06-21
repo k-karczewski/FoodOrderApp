@@ -43,14 +43,13 @@ namespace FoodOrderApp.Data.DataContext
             {
                 entity.HasOne(p => p.Pizza).WithMany(pd => pd.PizzaDetails).HasForeignKey(k => k.PizzaId);
                 entity.HasOne(s => s.Starter).WithMany(pd => pd.Pizzas).HasForeignKey(k => k.StarterId);
-                //entity.Property(k => k.Id).ValueGeneratedOnAdd().UseIdentityColumn();
                 entity.Property(p => p.TotalPrice).HasColumnType("decimal(4,2)");
                 entity.ToTable("PizzaDetails");
             });
 
             modelBuilder.Entity<PizzaOrderModel>(entity =>
             {
-                entity.HasKey(po => new { po.DetailId, po.OrderId });
+                entity.HasKey(po => new { po.PizzaDetailId, po.OrderId, po.PizzaId });
             });
 
             modelBuilder.Entity<OrderModel>(entity =>
