@@ -7,6 +7,7 @@ using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Models.Dtos;
 using FoodOrderApp.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
@@ -46,6 +47,23 @@ namespace FoodOrderAppAPI.Controllers
             IServiceResult orderResult = await _orderService.CancelOrder(orderId, int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value));
 
             if (orderResult.Result == ResultType.Edited)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpDelete]
+        [Route("delete/{orderId}")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<IActionResult> DeleteOrder(int orderId)
+        {
+            IServiceResult orderResult = await _orderService.DeleteOrder(orderId);
+
+            if (orderResult.Result == ResultType.Deleted)
             {
                 return Ok();
             }

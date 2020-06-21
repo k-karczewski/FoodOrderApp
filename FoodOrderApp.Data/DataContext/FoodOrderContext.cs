@@ -55,6 +55,7 @@ namespace FoodOrderApp.Data.DataContext
             modelBuilder.Entity<OrderModel>(entity =>
             {
                 entity.Property(p => p.TotalPrice).HasColumnType("decimal(4,2)");
+                entity.HasMany(po => po.PizzaOrders).WithOne(o => o.Order).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(u => u.User).WithMany(o => o.Orders).HasForeignKey(k => k.UserId);
             });
 

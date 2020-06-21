@@ -22,7 +22,14 @@ namespace FoodOrderApp.Interfaces.Services
         /// </summary>
         /// <param name="orderId">id of order to be canceled</param>
         /// <param name="userId">id of user that order belongs to</param>
-        /// <returns>ServiceResult of statuses correct or error</returns>
+        /// <returns>ServiceResult of statuses edited or error</returns>
         Task<IServiceResult> CancelOrder(int orderId, int userId);
+
+        /// <summary>
+        /// Deletes order from database
+        /// </summary>
+        /// <param name="orderId">id of order to be deleted</param>
+        /// <returns>ServiceResult of statuses deleted or error</returns>
+        Task<IServiceResult> DeleteOrder(int orderId);
     }
 }
