@@ -41,6 +41,7 @@ namespace FoodOrderAppAPI
             services.AddScoped<IPizzaService, PizzaService>();
             services.AddScoped<IIngredientService, IngredientService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IOrderService, OrderService>();
 
             IdentityBuilder identityBuilder = services.AddIdentityCore<UserModel>(options => {
                 options.Password.RequireDigit = false;

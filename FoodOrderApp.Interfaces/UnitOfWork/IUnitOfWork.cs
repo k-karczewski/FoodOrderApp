@@ -1,4 +1,5 @@
 ﻿using FoodOrderApp.Interfaces.Repositories;
+using FoodOrderApp.Models.OrderModels;
 using FoodOrderApp.Models.PizzaModels;
 using FoodOrderApp.Models.PizzaModels.PhotoModels;
 using FoodOrderApp.Models.UserModels;
@@ -16,6 +17,7 @@ namespace FoodOrderApp.Interfaces.UnitOfWork
          IFoodOrderRepository<StarterModel> Starters { get; }
          IFoodOrderRepository<UserModel> Users { get; }
          IFoodOrderRepository<PhotoModel> Photos { get; }
+         IFoodOrderRepository<OrderModel> Orders { get; }
 
          Task SaveChangesAsync();
     }

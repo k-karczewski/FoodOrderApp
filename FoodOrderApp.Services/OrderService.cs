@@ -2,9 +2,12 @@
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Interfaces.UnitOfWork;
 using FoodOrderApp.Models.Dtos;
+using FoodOrderApp.Models.Enums;
 using FoodOrderApp.Models.OrderModels;
 using FoodOrderApp.Models.PizzaModels;
+using FoodOrderApp.Models.PizzaModels.DetailModels;
 using FoodOrderApp.Models.UserModels;
+using FoodOrderApp.Services.ServiceResults;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -32,42 +35,37 @@ namespace FoodOrderApp.Services
                 if(await CheckIfPizzasExist(pizzaIds))
                 {
                     UserModel purchaser = (await _repository.Users.GetByExpressionAsync(x => x.Id == userId, i => i.Include(o => o.Orders))).SingleOrDefault();
+                    List<PizzaOrderModel> pizzaOrder = await ConvertToOrder(pizzas);
 
+                    OrderModel order = new OrderModel
+                    {
+                        UserId = purchaser.Id,
+                        User = purchaser,
+                        PizzaOrders = pizzaOrder,
+                        Status = OrderStatus.New,
+                        TotalPrice = CountTotalOrderPrice(pizzaOrder)
+                    };
 
+                    await _repository.Orders.CreateAsync(order);
+                    await _repository.SaveChangesAsync();
 
-
-
+                    return new ServiceResult(ResultType.Correct);
                 }
-
-
-
-
-
-
-            }catch(Exception) { }
-
-
-
-
-
-
-
-
-
-
-            throw new NotImplementedException();
+                else
+                {
+                    throw new Exception("Error during creating order");
+                }
+            }
+            catch(Exception e) 
+            {
+                return new ServiceResult(ResultType.Error, new List<string> { e.Message });
+            }
         }
-
-
-
-
-
 
         public Task<IServiceResult> CancelOrder(int orderId)
         {
             throw new NotImplementedException();
         }
-
 
         private async Task<bool> CheckIfPizzasExist(IEnumerable<int> pizzaIds)
         {
@@ -87,19 +85,51 @@ namespace FoodOrderApp.Services
             return doExist;
         }
 
-        //private ICollection<PizzaOrderModel> ConvertToOrder(IEnumerable<PizzaToOrderDto> pizzasToOrder)
-        //{
-        //    List<PizzaOrderModel> order = new List<PizzaOrderModel>();
+        private async Task<List<PizzaOrderModel>> ConvertToOrder(IEnumerable<PizzaToOrderDto> orderItems)
+        {
+            List<PizzaOrderModel> order = new List<PizzaOrderModel>();
 
-        //    foreach (PizzaToOrderDto dto in pizzasToOrder)
-        //    {
-        //        dto.
-        //        order.Add(new PizzaOrderModel
-        //        {
-        //            i
-        //        });
-        //    }
-        //}
+            try
+            {
+                foreach (PizzaToOrderDto dto in orderItems)
+                {
+                    PizzaModel pizzaToOrder = (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == dto.PizzaId, i => i.Include(d => d.PizzaDetails))).SingleOrDefault();
+                    PizzaDetailsModel pizzaDetail = pizzaToOrder.PizzaDetails.FirstOrDefault(x => x.Size == dto.Size);
+                    pizzaToOrder.PizzaDetails = new List<PizzaDetailsModel>();
+                    pizzaToOrder.PizzaDetails.Add(pizzaDetail);
 
+                    if (pizzaToOrder != null)
+                    {
+                        order.Add(new PizzaOrderModel
+                        {
+                            DetailId = pizzaToOrder.PizzaDetails.FirstOrDefault().Id,
+                            PizzaDetail = pizzaToOrder.PizzaDetails.FirstOrDefault()
+                        });
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+
+                return order;
+            }
+            catch(Exception)
+            {
+                return null;
+            }
+        }
+
+        private decimal CountTotalOrderPrice(List<PizzaOrderModel> orderItems)
+        {
+            decimal total = 0;
+
+            foreach(PizzaOrderModel item in orderItems)
+            {
+                total += item.PizzaDetail.TotalPrice;
+            }
+
+            return total;
+        }
     }
 }
