@@ -184,7 +184,7 @@ namespace FoodOrderApp.Tests.Services
             Assert.AreEqual(ResultType.Created, creationResult.Result);
             Assert.IsNotNull(creationResult.ReturnedObject);
             Assert.AreEqual(expectedPizzaToCreate.Name, creationResult.ReturnedObject.Name);
-            Assert.AreEqual("Mushrooms", creationResult.ReturnedObject.Ingredients.First().Name);
+            Assert.AreEqual("Mushrooms", creationResult.ReturnedObject.Ingredients.First());
             Assert.IsNotNull(creationResult.ReturnedObject.TotalPrices);
             Assert.AreEqual(4, creationResult.ReturnedObject.TotalPrices.Count);
         }

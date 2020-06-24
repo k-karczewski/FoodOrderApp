@@ -9,6 +9,6 @@ namespace FoodOrderApp.Models.Dtos
         public string PhotoUrl { get; set; }
 
         public ICollection<PriceToReturnDto> TotalPrices { get; set; }
-        public ICollection<IngredientToReturnDto> Ingredients { get; set; }
+        public ICollection<string> Ingredients { get; set; }
     }
 }
