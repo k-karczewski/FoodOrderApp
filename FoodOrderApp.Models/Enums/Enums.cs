@@ -30,4 +30,13 @@ namespace FoodOrderApp.Models.Enums
         Deleted,
         Unauthorized
     }
+
+    public enum PizzaCategory
+    {
+        Traditional,
+        Vegetarian,
+        Spicy,
+        Meat,
+        Seafood
+    }
 }
