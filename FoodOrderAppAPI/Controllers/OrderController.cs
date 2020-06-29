@@ -24,8 +24,7 @@ namespace FoodOrderAppAPI.Controllers
             _orderService = orderService;
         }
 
-        [HttpPost]
-        [Route("new")]
+        [HttpPost("new")]
         public async Task<IActionResult> MakeOrder(ICollection<PizzaToOrderDto> orderItems)
         {
             IServiceResult orderResult = await _orderService.MakeOrder(orderItems, int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value));
@@ -40,13 +39,12 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("cancel/{orderId}")]
+        [HttpPost("cancel/{orderId}")]
         public async Task<IActionResult> CancelOrder(int orderId)
         {
-            IServiceResult orderResult = await _orderService.CancelOrder(orderId, int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value));
+            IServiceResult cancelResult = await _orderService.CancelOrder(orderId, int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value));
 
-            if (orderResult.Result == ResultType.Edited)
+            if (cancelResult.Result == ResultType.Edited)
             {
                 return Ok();
             }
@@ -56,14 +54,13 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
-        [HttpDelete]
-        [Route("delete/{orderId}")]
+        [HttpDelete("delete/{orderId}")]
         [Authorize(Policy = "RequireAdminRole")]
         public async Task<IActionResult> DeleteOrder(int orderId)
         {
-            IServiceResult orderResult = await _orderService.DeleteOrder(orderId);
+            IServiceResult deletionResult = await _orderService.DeleteOrder(orderId);
 
-            if (orderResult.Result == ResultType.Deleted)
+            if (deletionResult.Result == ResultType.Deleted)
             {
                 return Ok();
             }

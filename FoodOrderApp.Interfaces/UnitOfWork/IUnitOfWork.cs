@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FoodOrderApp.Interfaces.UnitOfWork
 {
-    public interface IUnitOfWork : IAsyncDisposable
+    public interface IUnitOfWork
     {
          IFoodOrderRepository<IngredientModel> Ingredients { get; }
          IFoodOrderRepository<PizzaModel> Pizzas { get; }

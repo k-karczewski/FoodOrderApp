@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FoodOrderApp.Models.UserModels
 {
-    public class UserModel : IdentityUser<int>
+    public class UserModel : IdentityUser<int> 
     {
         public ICollection<OrderModel> Orders { get; set; }
 

@@ -52,7 +52,7 @@ namespace FoodOrderApp.Services
 
                         if(deletionResult == false)
                         {
-                            throw new Exception("Error during removing of photo from repo or cloud");
+                            return new ServiceResult(ResultType.Error, new List<string> { "Error during deletion of photo" });
                         }
                     }
 
@@ -78,20 +78,17 @@ namespace FoodOrderApp.Services
 
                         return new ServiceResult(ResultType.Correct);
                     }
-
-                    throw new Exception("Error during addition of pizza photo");
                 }
 
-                throw new Exception("Photo has not been received");
-
+                return new ServiceResult(ResultType.Error, new List<string> { "Error during deletion of photo" });
             }
             catch (Exception e)
             {
                 return new ServiceResult(ResultType.Error, new List<string> { e.Message });
             }
-
         }
 
+        //not used yet
         public async Task<IServiceResult> DeletePizzaPhotoAsync(int pizzaId)
         {
             try
@@ -102,15 +99,13 @@ namespace FoodOrderApp.Services
                 {
                     bool deletionResult = await DeletePhotoAsync(photoRecipent.Photo);
 
-                    if (deletionResult == false)
+                    if (deletionResult == true)
                     {
-                        throw new Exception("Error during removing of photo from repo or cloud");
-                    }
-
-                    return new ServiceResult(ResultType.Deleted);
+                        return new ServiceResult(ResultType.Deleted);
+                    }        
                 }
 
-                throw new Exception($"Pizza with id {pizzaId} does not exist or does not have any photo");
+                return new ServiceResult(ResultType.Error, new List<string> { "Error during deletion of pizza photo" });
             }
             catch (Exception e)
             {

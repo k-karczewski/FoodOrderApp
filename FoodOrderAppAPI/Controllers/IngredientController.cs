@@ -5,7 +5,6 @@ using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Models.Dtos;
 using FoodOrderApp.Models.Enums;
 using FoodOrderApp.Models.PizzaModels;
-using FoodOrderApp.Models.PizzaModels.DetailModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodOrderAppAPI.Controllers
@@ -51,8 +50,7 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("create")]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateIngredient(IngredientModel ingredient)
         {
             if (ModelState.IsValid)
@@ -74,8 +72,22 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
-        [HttpPut]
-        [Route("change-price/{ingredientId}")]
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteIngredient(int id)
+        {
+            IServiceResult result = await _service.DeleteAsync(id);
+
+            if (result.Result == ResultType.Deleted)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(result.Errors);
+            }
+        }
+
+        [HttpPut("change-price/{ingredientId}")]
         public async Task<IActionResult> ChangePrice(IngredientDetailsToCreateDto price, int ingredientId)
         {
             if(ModelState.IsValid)
@@ -94,22 +106,6 @@ namespace FoodOrderAppAPI.Controllers
             else
             {
                 return BadRequest();
-            }
-        }
-
-        [HttpDelete]
-        [Route("delete/{id}")]
-        public async Task<IActionResult> DeleteIngredient(int id)
-        {
-            IServiceResult result = await _service.DeleteAsync(id);
-
-            if(result.Result == ResultType.Deleted)
-            {
-                return Ok();
-            }
-            else
-            {
-                return BadRequest(result.Errors);
             }
         }
     }

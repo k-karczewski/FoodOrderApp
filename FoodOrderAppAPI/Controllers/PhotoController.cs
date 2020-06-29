@@ -12,8 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace FoodOrderAppAPI.Controllers
 {
     [ApiController]
-    [Authorize(Policy = "RequireAdminRole")]
     [Route("api/[controller]/")]
+    [Authorize(Policy = "RequireAdminRole")]
     public class PhotoController : ControllerBase
     {
         private readonly IPhotoService _photoService;
@@ -23,8 +23,7 @@ namespace FoodOrderAppAPI.Controllers
             _photoService = photoService;
         }
 
-        [HttpPost]
-        [Route("add")]
+        [HttpPost("add")]
         public async Task<IActionResult> AddPizzaPhotoAsync(PhotoToCreateDto photoToCreate)
         {
             IServiceResult result = await _photoService.AddPizzaPhotoAsync(photoToCreate);

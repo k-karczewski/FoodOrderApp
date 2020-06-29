@@ -21,7 +21,7 @@ namespace FoodOrderApp.Tests.Services
     [TestClass]
     public class IngredientService_Tests
     {
-        List<IngredientModel> expectedIngredients;
+        IEnumerable<IngredientModel> expectedIngredients;
         Mock<IUnitOfWork> uowMock;
         Mock<IFoodOrderRepository<IngredientModel>> repoMock;
 
@@ -95,8 +95,8 @@ namespace FoodOrderApp.Tests.Services
             IServiceResult<IngredientModel> result = await service.GetByIdAsync(idOfIngredient);
 
             Assert.AreEqual(ResultType.Correct, result.Result);
-            Assert.AreEqual(expectedIngredients[0].Id, result.ReturnedObject.Id);
-            Assert.AreEqual(expectedIngredients[0].Name, result.ReturnedObject.Name);
+            Assert.AreEqual(expectedIngredients.ElementAt(0).Id, result.ReturnedObject.Id);
+            Assert.AreEqual(expectedIngredients.ElementAt(0).Name, result.ReturnedObject.Name);
         }
 
         [TestMethod]
@@ -139,7 +139,7 @@ namespace FoodOrderApp.Tests.Services
 
             Assert.AreEqual(ResultType.Correct, getAllResult.Result);
             Assert.IsNotNull(getAllResult.ReturnedObject);
-            Assert.AreEqual(expectedIngredients.Count, getAllResult.ReturnedObject.Count);
+            Assert.AreEqual(expectedIngredients.Count(), getAllResult.ReturnedObject.Count);
         }
 
         [TestMethod]
@@ -194,14 +194,14 @@ namespace FoodOrderApp.Tests.Services
         [TestMethod]
         public async Task DeleteExistingIngredient()
         {
-            repoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<IngredientModel, bool>>>(), null)).Returns(GetFakeIngredientByName(expectedIngredients[0].Name));
-            repoMock.Setup(x => x.Delete(expectedIngredients[0]));
+            repoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<IngredientModel, bool>>>(), null)).Returns(GetFakeIngredientByName(expectedIngredients.ElementAt(0).Name));
+            repoMock.Setup(x => x.Delete(expectedIngredients.ElementAt(0)));
 
             uowMock.Setup(x => x.Ingredients).Returns(repoMock.Object);
 
             IIngredientService ingredientService = new IngredientService(uowMock.Object);
 
-            IServiceResult deleteResult = await ingredientService.DeleteAsync(expectedIngredients[0].Id);
+            IServiceResult deleteResult = await ingredientService.DeleteAsync(expectedIngredients.ElementAt(0).Id);
 
             Assert.AreEqual(ResultType.Deleted, deleteResult.Result);
             Assert.IsNull(deleteResult.Errors);
@@ -246,7 +246,7 @@ namespace FoodOrderApp.Tests.Services
                                            It.IsAny<Func<IQueryable<IngredientModel>, IIncludableQueryable<IngredientModel, object>>>())).
                                            Returns(GetFakeIngredientById(idOfIngredient));
 
-            repoMock.Setup(x => x.Update(expectedIngredients[idOfIngredient]));
+            repoMock.Setup(x => x.Update(expectedIngredients.ElementAt(idOfIngredient)));
 
             pizzaRepoMock.Setup(x => x.GetByExpressionAsync(It.IsAny<Expression<Func<PizzaModel, bool>>>(),
                                            It.IsAny<Func<IQueryable<PizzaModel>, IIncludableQueryable<PizzaModel, object>>>())).
@@ -271,19 +271,19 @@ namespace FoodOrderApp.Tests.Services
         }
 
 
-        private async Task<IEnumerable<IngredientModel>> GetFakeIngredientById(int id)
+        private Task<IEnumerable<IngredientModel>> GetFakeIngredientById(int id)
         {
-            return expectedIngredients.Where(x => x.Id == id);
+            return Task.FromResult(expectedIngredients.Where(x => x.Id == id));
         }
 
-        private async Task<IEnumerable<IngredientModel>> GetFakeIngredientByName(string name)
+        private Task<IEnumerable<IngredientModel>> GetFakeIngredientByName(string name)
         {
-            return expectedIngredients.Where(x => x.Name == name);
+            return Task.FromResult(expectedIngredients.Where(x => x.Name == name));
         }
 
-        private async Task<IEnumerable<IngredientModel>> GetFakeIngredients()
+        private Task<IEnumerable<IngredientModel>> GetFakeIngredients()
         {
-            return expectedIngredients;
+            return Task.FromResult(expectedIngredients);
         }
 
         private async Task<IEnumerable<PizzaModel>> GetFakePizzas()

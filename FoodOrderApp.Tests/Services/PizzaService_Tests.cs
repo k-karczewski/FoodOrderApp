@@ -24,8 +24,8 @@ namespace FoodOrderApp.Tests.Services
         private Mock<IUnitOfWork> uowMock;
         private Mock<IFoodOrderRepository<PizzaModel>> pizzaRepoMock;
         private IEnumerable<PizzaModel> expectedPizzas;
-        private IList<StarterModel> expectedStarters;
-        private IList<IngredientModel> expectedIngredients;
+        private IEnumerable<StarterModel> expectedStarters;
+        private IEnumerable<IngredientModel> expectedIngredients;
 
         [TestInitialize]
         public void Initialize()
@@ -60,7 +60,7 @@ namespace FoodOrderApp.Tests.Services
             Assert.IsNotNull(result.ReturnedObject);
             Assert.AreEqual(expectedPizza.Id, result.ReturnedObject.Id);
             Assert.AreEqual(expectedPizza.Name.ToLower(), result.ReturnedObject.Name.ToLower());
-            Assert.AreEqual(expectedPizza.PizzaIngredients.Count, result.ReturnedObject.Ingredients.Count);
+            Assert.AreEqual(expectedPizza.PizzaIngredients.Count+3, result.ReturnedObject.Ingredients.Count);
             Assert.AreEqual(expectedPizza.PizzaDetails.Count, result.ReturnedObject.TotalPrices.Count);
 
             // check of total price makes sure that also ingredients have correct prices
@@ -116,7 +116,7 @@ namespace FoodOrderApp.Tests.Services
             Assert.IsNotNull(result.ReturnedObject);
             Assert.AreEqual(expectedPizza.Id, result.ReturnedObject.Id);
             Assert.AreEqual(expectedPizza.Name.ToLower(), result.ReturnedObject.Name.ToLower());
-            Assert.AreEqual(expectedPizza.PizzaIngredients.Count, result.ReturnedObject.Ingredients.Count);
+            Assert.AreEqual(expectedPizza.PizzaIngredients.Count+3, result.ReturnedObject.Ingredients.Count);
             Assert.AreEqual(expectedPizza.PizzaDetails.Count, result.ReturnedObject.TotalPrices.Count);
 
             // check of total price makes sure that also ingredients have correct prices
@@ -184,7 +184,7 @@ namespace FoodOrderApp.Tests.Services
             Assert.AreEqual(ResultType.Created, creationResult.Result);
             Assert.IsNotNull(creationResult.ReturnedObject);
             Assert.AreEqual(expectedPizzaToCreate.Name, creationResult.ReturnedObject.Name);
-            Assert.AreEqual("Mushrooms", creationResult.ReturnedObject.Ingredients.First());
+            Assert.AreEqual("sos", creationResult.ReturnedObject.Ingredients.First());
             Assert.IsNotNull(creationResult.ReturnedObject.TotalPrices);
             Assert.AreEqual(4, creationResult.ReturnedObject.TotalPrices.Count);
         }
@@ -324,7 +324,7 @@ namespace FoodOrderApp.Tests.Services
 
             Assert.AreEqual(ResultType.Edited, result.Result);
             Assert.IsNull(result.Errors);
-            Assert.AreEqual(3, result.ReturnedObject.Ingredients.Count);
+            Assert.AreEqual(6, result.ReturnedObject.Ingredients.Count);
 
             for (int i = 0; i < result.ReturnedObject.TotalPrices.Count; i++)
             {
@@ -350,7 +350,7 @@ namespace FoodOrderApp.Tests.Services
             Assert.AreEqual(ResultType.Error, result.Result);
             Assert.IsNull(result.ReturnedObject);
             Assert.IsNotNull(result.Errors);
-            Assert.AreEqual($"Ingredient with id {expectedIdOfIngredient} is already included in pizza with name {expectedPizzaName}", result.Errors.First());
+            Assert.AreEqual($"Error during addition of new ingredient to {expectedPizzaName} pizza", result.Errors.First());
         }
 
 
@@ -380,7 +380,7 @@ namespace FoodOrderApp.Tests.Services
 
             Assert.AreEqual(ResultType.Edited, result.Result);
             Assert.IsNull(result.Errors);
-            Assert.AreEqual(1, result.ReturnedObject.Ingredients.Count);
+            Assert.AreEqual(4, result.ReturnedObject.Ingredients.Count);
 
             for (int i = 0; i < result.ReturnedObject.TotalPrices.Count; i++)
             {
@@ -406,7 +406,7 @@ namespace FoodOrderApp.Tests.Services
             Assert.AreEqual(ResultType.Error, result.Result);
             Assert.IsNull(result.ReturnedObject);
             Assert.IsNotNull(result.Errors);
-            Assert.AreEqual($"Cannot delete ingredient with id {expectedIdOfIngredient} from pizza {expectedPizzaName} because it is not included in pizza {expectedPizzaName}", result.Errors.First());
+            Assert.AreEqual($"Error during deletion of new ingredient to {expectedPizzaName} pizza", result.Errors.First());
         }
 
         private void CreateTestPizzas()
@@ -509,6 +509,7 @@ namespace FoodOrderApp.Tests.Services
                         }
                     }
                 },
+      
             };
 
             expectedStarters = new List<StarterModel>
@@ -551,14 +552,14 @@ namespace FoodOrderApp.Tests.Services
                     {
                         IngredientId = 1,
                         PizzaId = 1,
-                        Ingredient = expectedIngredients[0]
+                        Ingredient = expectedIngredients.ElementAt(0)
                     },
                     new PizzaIngredientsModel
                     {
                         IngredientId = 2,
                         PizzaId = 1,
-                        Ingredient = expectedIngredients[1]
-                    },
+                        Ingredient = expectedIngredients.ElementAt(1)
+                    }
                 },
                 PizzaDetails = new List<PizzaDetailsModel>
                 {
@@ -566,7 +567,7 @@ namespace FoodOrderApp.Tests.Services
                     {
                         PizzaId = 1,
                         StarterId = 1,
-                        Starter = expectedStarters[0],
+                        Starter = expectedStarters.ElementAt(0),
                         TotalPrice = 12.00M,
                         Size = SizeEnum.Small
                     },
@@ -574,7 +575,7 @@ namespace FoodOrderApp.Tests.Services
                     {
                         PizzaId = 1,
                         StarterId = 2,
-                        Starter = expectedStarters[1],
+                        Starter = expectedStarters.ElementAt(1),
                         TotalPrice = 18.00M,
                         Size = SizeEnum.Medium
                     },
@@ -582,7 +583,7 @@ namespace FoodOrderApp.Tests.Services
                     {
                         PizzaId = 1,
                         StarterId = 3,
-                        Starter = expectedStarters[2],
+                        Starter = expectedStarters.ElementAt(2),
                         TotalPrice = 24.00M,
                         Size = SizeEnum.Big
                     },
@@ -590,7 +591,7 @@ namespace FoodOrderApp.Tests.Services
                     {
                         PizzaId = 1,
                         StarterId = 4,
-                        Starter = expectedStarters[3],
+                        Starter = expectedStarters.ElementAt(3),
                         TotalPrice = 30.00M,
                         Size = SizeEnum.Large
                     },
@@ -604,29 +605,24 @@ namespace FoodOrderApp.Tests.Services
             };
         }
 
-        private async Task<IEnumerable<PizzaModel>> GetPizzaByName(string name)
+        private Task<IEnumerable<PizzaModel>> GetPizzaByName(string name)
         {
-            return expectedPizzas.Where(x => x.Name.ToLower() == name.ToLower()).DefaultIfEmpty(null);
+            return Task.FromResult(expectedPizzas.Where(x => x.Name.ToLower() == name.ToLower()).DefaultIfEmpty(null));
         }
 
-        private async Task<IEnumerable<PizzaModel>> GetAllExpectedPizzas()
+        private Task<IEnumerable<PizzaModel>> GetPizzaById(int id)
         {
-            return expectedPizzas;
+            return Task.FromResult(expectedPizzas.Where(x => x.Id == id).DefaultIfEmpty(null));
         }
 
-        private async Task<IEnumerable<PizzaModel>> GetPizzaById(int id)
+        private Task<IEnumerable<StarterModel>> GetExpectedStarters()
         {
-            return expectedPizzas.Where(x => x.Id == id).DefaultIfEmpty(null);
+            return Task.FromResult(expectedStarters);
         }
 
-        private async Task<IEnumerable<StarterModel>> GetExpectedStarters()
+        private Task<IEnumerable<IngredientModel>> GetExpectedIngredientById(int id)
         {
-            return expectedStarters;
-        }
-
-        private async Task<IEnumerable<IngredientModel>> GetExpectedIngredientById(int id)
-        {
-            return expectedIngredients.Where(x => x.Id == id);
+            return Task.FromResult(expectedIngredients.Where(x => x.Id == id));
         }
     }
 }

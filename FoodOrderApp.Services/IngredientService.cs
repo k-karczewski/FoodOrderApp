@@ -19,6 +19,58 @@ namespace FoodOrderApp.Services
         public IngredientService(IUnitOfWork repository) : base(repository) { }
 
         /// <summary>
+        /// Gets all ingredients from database with their prices
+        /// </summary>
+        /// <returns>List of all ingredients or errors (depending on result type)</returns>
+        public async Task<IServiceResult<List<IngredientModel>>> GetAsync()
+        {
+            try
+            {
+                // try to get all ingredients
+                List<IngredientModel> ingredients = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id > 0, i => i.Include(id => id.IngredientDetails))).ToList();
+
+                if(ingredients != null)
+                {
+                    return new ServiceResult<List<IngredientModel>>(ResultType.Correct, ingredients);
+                }
+
+                return new ServiceResult<List<IngredientModel>>(ResultType.Error, new List<string> { "Error during ingredient list get operation" });
+            }
+            catch (Exception e)
+            {
+                // catch errors and pass them to controller
+                return new ServiceResult<List<IngredientModel>>(ResultType.Error, new List<string> { e.Message });
+            }
+        }
+
+        /// <summary>
+        /// Gets ingredient with id passed by parameter
+        /// </summary>
+        /// <param name="id">identifier of ingredient</param>
+        /// <returns>Ingredient from database or list of errors (depending on result type)</returns>
+        public async Task<IServiceResult<IngredientModel>> GetByIdAsync(int id)
+        {
+            try
+            {
+                // try to get ingredient with specific id
+                IngredientModel result = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id == id, i => i.Include(id => id.IngredientDetails))).SingleOrDefault();
+
+                if (result != null)
+                {
+                    // return it to controller
+                    return new ServiceResult<IngredientModel>(ResultType.Correct, result);
+                }
+
+                return new ServiceResult<IngredientModel>(ResultType.Error, new List<string>() { $"Object with id: {id} has not been found" });
+            }
+            catch (Exception e)
+            {
+                // catch errors and pass them to controller
+                return new ServiceResult<IngredientModel>(ResultType.Error, new List<string>() { e.Message });
+            }
+        }
+
+        /// <summary>
         /// Creates new ingredient
         /// </summary>
         /// <param name="newObject">ingredient to be added to database</param>
@@ -41,10 +93,8 @@ namespace FoodOrderApp.Services
                     // return Ok service result with created object
                     return new ServiceResult<IngredientModel>(ResultType.Created, newObject);                 
                 }
-                else
-                {
-                    throw new Exception($"Ingredient with name {newObject.Name} already exists in database");
-                }
+
+                return new ServiceResult<IngredientModel>(ResultType.Error, new List<string> { $"Ingredient with name {newObject.Name} already exists in database" });
             }
             catch(Exception e)
             {
@@ -69,71 +119,20 @@ namespace FoodOrderApp.Services
                 {
                     // try to delete it
                     _repository.Ingredients.Delete(ingredientToDelete);
+
                     // save changes in database context
                     await _repository.SaveChangesAsync();
 
                     // return service result with Deleted status
                     return new ServiceResult(ResultType.Deleted);                
                 }
-                else
-                {
-                    throw new Exception($"Ingredient with id {ingredientId} was not found in database");
-                }
+                
+                return new ServiceResult(ResultType.Error, new List<string> { $"Ingredient with id {ingredientId} was not found in database" });                
             }
             catch (Exception e)
             {
                 // catch exception and pass errors to controller
                 return new ServiceResult(ResultType.Error, new List<string> { e.Message });
-            }
-        }
-
-        /// <summary>
-        /// Gets all ingredients from database with their prices
-        /// </summary>
-        /// <returns>List of all ingredients or errors (depending on result type)</returns>
-        public async Task<IServiceResult<List<IngredientModel>>> GetAsync()
-        {
-            try
-            {
-                // try to get all ingredients
-                List<IngredientModel> ingredients = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id > 0, i => i.Include(id => id.IngredientDetails))).ToList();
-
-                // if no exception occured during get operation return correct status 
-                return new ServiceResult<List<IngredientModel>>(ResultType.Correct, ingredients);
-            }
-            catch(Exception e)
-            {
-                // catch errors and pass them to controller
-                return new ServiceResult<List<IngredientModel>>(ResultType.Error, new List<string> { e.Message });
-            }
-        }
-
-        /// <summary>
-        /// Gets ingredient with id passed by parameter
-        /// </summary>
-        /// <param name="id">identifier of ingredient</param>
-        /// <returns>Ingredient from database or list of errors (depending on result type)</returns>
-        public async Task<IServiceResult<IngredientModel>> GetByIdAsync(int id)
-        {
-            try
-            {
-                // try to get ingredient with specific id
-                IngredientModel result = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id == id, i => i.Include(id => id.IngredientDetails))).SingleOrDefault();
-
-                // if ingredient was found
-                if (result != null)
-                {
-                    // return it to controller
-                    return new ServiceResult<IngredientModel>(ResultType.Correct, result);
-                }
-
-                // throw exception otherwise
-                throw new Exception($"Object with id: {id} has not been found");
-            }
-            catch (Exception e)
-            {
-                // catch errors and pass them to controller
-                return new ServiceResult<IngredientModel>(ResultType.Error, new List<string>() { e.Message });
             }
         }
 
@@ -166,11 +165,8 @@ namespace FoodOrderApp.Services
 
                     return new ServiceResult<IngredientModel>(ResultType.Edited, ingredientToUpdate);
                 }
-                else
-                {
-                    // throw exception if price was not found
-                    throw new Exception("Price has not been found");
-                }
+
+                return new ServiceResult<IngredientModel>(ResultType.Error, new List<string> { "Price has not been found" });
             }
             catch(Exception e)
             {
@@ -180,6 +176,7 @@ namespace FoodOrderApp.Services
 
         }
 
+        #region PrivateMethods
         private async Task UpdatePizzasPrices(int ingredientId)
         {
             // update price of all pizzas that include edited ingredient
@@ -198,5 +195,6 @@ namespace FoodOrderApp.Services
                 await _repository.SaveChangesAsync();
             }
         }
+        #endregion
     }
 }

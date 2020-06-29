@@ -4,7 +4,6 @@ using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Models.Dtos;
 using FoodOrderApp.Models.Enums;
-using FoodOrderApp.Models.PizzaModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -12,6 +11,7 @@ using Microsoft.AspNetCore.Routing;
 namespace FoodOrderAppAPI.Controllers
 {
     [ApiController]
+    [AllowAnonymous]
     [Route("api/[controller]/")]
     public class PizzaController : ControllerBase
     {
@@ -22,15 +22,14 @@ namespace FoodOrderAppAPI.Controllers
             _service = service;
         }
 
-        [HttpPost("create")]
-        [Authorize(Policy = "RequireAdminRole")]
-        public async Task<IActionResult> Create(PizzaToCreateDto pizzaToCreate)
+        [HttpGet]
+        public async Task<IActionResult> Get()
         {
-            IServiceResult<PizzaToReturnDto> result = await _service.CreateAsync(pizzaToCreate);
+            IServiceResult<List<PizzaToReturnDto>> result = await _service.GetAsync();
 
-            if (result.Result == ResultType.Created)
+            if (result.Result == ResultType.Correct)
             {
-                return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject.Name }, result.ReturnedObject);
+                return Ok(result.ReturnedObject);
             }
             else
             {
@@ -38,7 +37,6 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
-        [AllowAnonymous]
         [HttpGet("name/{name}", Name = "GetPizzaByName")]
         public async Task<IActionResult> GetByName(string name)
         {
@@ -69,15 +67,31 @@ namespace FoodOrderAppAPI.Controllers
             }
         }
 
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> Get()
+        [HttpPost("create")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<IActionResult> Create(PizzaToCreateDto pizzaToCreate)
         {
-            IServiceResult<List<PizzaToReturnDto>> result = await _service.GetAsync();
+            IServiceResult<PizzaToReturnDto> result = await _service.CreateAsync(pizzaToCreate);
 
-            if (result.Result == ResultType.Correct)
+            if (result.Result == ResultType.Created)
             {
-                return Ok(result.ReturnedObject);
+                return CreatedAtRoute("GetPizzaByName", new { name = result.ReturnedObject.Name }, result.ReturnedObject);
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpDelete("delete/{pizzaId}")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<IActionResult> Delete(int pizzaId)
+        {
+            IServiceResult result = await _service.DeleteAsync(pizzaId);
+
+            if (result.Result == ResultType.Deleted)
+            {
+                return Ok();
             }
             else
             {

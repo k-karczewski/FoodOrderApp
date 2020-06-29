@@ -47,28 +47,24 @@ namespace FoodOrderApp.Services
             {       
                 UserModel user = (await _unitOfWork.Users.GetByExpressionAsync(x => x.UserName.ToLower() == userToLogin.Username.ToLower())).SingleOrDefault();
 
-                if(user == null)
+                if(user != null)
                 {
-                    throw new Exception("Username and password do not match");
-                }
+                    SignInResult loginResult = await _signInManager.CheckPasswordSignInAsync(user, userToLogin.Password, false);
 
-                SignInResult loginResult = await _signInManager.CheckPasswordSignInAsync(user, userToLogin.Password, false);
-
-                if(loginResult.Succeeded)
-                {
-                    IList<string> usersRoles = await _signInManager.UserManager.GetRolesAsync(user);
-
-                    using(IJsonWebTokenProvider jwtProvider = new JsonWebTokenProvider(_configuration))
+                    if (loginResult.Succeeded)
                     {
-                        string token = jwtProvider.GenerateJwtBearer(user, usersRoles);
+                        IList<string> usersRoles = await _signInManager.UserManager.GetRolesAsync(user);
 
-                        return new ServiceResult<string>(ResultType.Correct, token);
+                        using (IJsonWebTokenProvider jwtProvider = new JsonWebTokenProvider(_configuration))
+                        {
+                            string token = jwtProvider.GenerateJwtBearer(user, usersRoles);
+
+                            return new ServiceResult<string>(ResultType.Correct, token);
+                        }
                     }
                 }
-                else
-                {
-                    throw new Exception("Username and password do not match");
-                }
+
+                return new ServiceResult<string>(ResultType.Error, new List<string> { "Incorrect username or password" });
             }
             catch(Exception e)
             {
@@ -94,36 +90,19 @@ namespace FoodOrderApp.Services
                 {
                     // assign roles
                     await userToRegister.AssignRole(userToRegister, _signInManager.UserManager, _roleManager);
+                    await SendConfirmationEmail(userToRegister, url);
 
-                    // generate email confirmation token
-                    string confirmationToken = await _signInManager.UserManager.GenerateEmailConfirmationTokenAsync(userToRegister);
-
-                    // convert the token from UTF8 to bytes and then to URL
-                    confirmationToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(confirmationToken));
-
-                    string urlLink = url.Action("ConfirmEmail", "Auth", new { userId = userToRegister.Id, token = confirmationToken }, "https");
-                    urlLink = HtmlEncoder.Default.Encode(urlLink);
-
-                    using (IEmailSender emailSender = new EmailSender(_configuration))
-                    {
-                        await emailSender.SendAccountConfirmation(userToRegister, urlLink);
-                    }
-                                 
                     return new ServiceResult<UserModel>(ResultType.Created, userToRegister);
                 }
 
                 List<string> errors = new List<string>();
-
-                foreach (IdentityError identityError in result.Errors)
-                {
-                    errors.Add(identityError.Description);
-                }
+                errors.AddRange(result.Errors.Select(x => x.Description));
 
                 return new ServiceResult<UserModel>(ResultType.Error, errors);
-
             }
             catch(Exception e)
             {
+                // remove added user if whole registration process has not been completed
                 UserModel registeredUser = (await _unitOfWork.Users.GetByExpressionAsync(x => x.UserName.ToLower() == userToRegister.UserName.ToLower())).SingleOrDefault();
 
                 if (registeredUser != null)
@@ -159,11 +138,28 @@ namespace FoodOrderApp.Services
                     }
                 }
 
-                throw new Exception("Error during email confirmation");
+                return new ServiceResult(ResultType.Error, new List<string> { "Error during account confirmation process" });
             }
             catch(Exception e)
             {
                 return new ServiceResult(ResultType.Error, new List<string> { e.Message });
+            }
+        }
+
+        private async Task SendConfirmationEmail(UserModel newUser, IUrlHelper url)
+        {
+            // generate email confirmation token
+            string confirmationToken = await _signInManager.UserManager.GenerateEmailConfirmationTokenAsync(newUser);
+
+            // convert the token from UTF8 to bytes and then to URL
+            confirmationToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(confirmationToken));
+
+            string urlLink = url.Action("ConfirmEmail", "Auth", new { userId = newUser.Id, token = confirmationToken }, "https");
+            urlLink = HtmlEncoder.Default.Encode(urlLink);
+
+            using (IEmailSender emailSender = new EmailSender(_configuration))
+            {
+                await emailSender.SendAccountConfirmation(newUser, urlLink);
             }
         }
     }

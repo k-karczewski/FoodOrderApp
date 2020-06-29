@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FoodOrderApp.Interfaces.Services;
 using FoodOrderApp.Interfaces.Services.ServiceResults;
 using FoodOrderApp.Models.Dtos;
@@ -11,8 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FoodOrderAppAPI.Controllers
 {
-    [ApiController]
     [Authorize]
+    [ApiController] 
     [Route("api/[controller]/")]
     public class AuthController : ControllerBase
     {
@@ -38,35 +36,6 @@ namespace FoodOrderAppAPI.Controllers
                 IServiceResult<UserModel> registerResult = await _authService.RegisterAsync(user, userToRegister.Password, Url);
 
                 if(registerResult.Result == ResultType.Created)
-                {
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest(registerResult.Errors);
-                }
-            }
-            else
-            {
-                return BadRequest(ModelState.Values);
-            }
-        }
-       
-        [HttpPost("admin/register")]
-        [Authorize(Policy = "RequireAdminRole")]
-        public async Task<IActionResult> RegisterAdminAsync(UserToRegisterDto userToRegister)
-        {
-            if (ModelState.IsValid)
-            {
-                UserModel user = new AdminModel
-                {
-                    UserName = userToRegister.Username,
-                    Email = userToRegister.EmailAddress
-                };
-
-                IServiceResult<UserModel> registerResult = await _authService.RegisterAsync(user, userToRegister.Password, Url);
-
-                if (registerResult.Result == ResultType.Created)
                 {
                     return Ok();
                 }
@@ -113,7 +82,7 @@ namespace FoodOrderAppAPI.Controllers
         {
             IServiceResult confirmationResult = await _authService.ConfirmEmailAsync(userId, token);
 
-            if(confirmationResult.Result == ResultType.Correct)
+            if (confirmationResult.Result == ResultType.Correct)
             {
                 return Ok();
             }
@@ -121,5 +90,33 @@ namespace FoodOrderAppAPI.Controllers
             return BadRequest(confirmationResult.Errors);
         }
 
+        [HttpPost("admin/register")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<IActionResult> RegisterAdminAsync(UserToRegisterDto userToRegister)
+        {
+            if (ModelState.IsValid)
+            {
+                UserModel user = new AdminModel
+                {
+                    UserName = userToRegister.Username,
+                    Email = userToRegister.EmailAddress
+                };
+
+                IServiceResult<UserModel> registerResult = await _authService.RegisterAsync(user, userToRegister.Password, Url);
+
+                if (registerResult.Result == ResultType.Created)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(registerResult.Errors);
+                }
+            }
+            else
+            {
+                return BadRequest(ModelState.Values);
+            }
+        }
     }
 }

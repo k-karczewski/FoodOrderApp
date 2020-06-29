@@ -38,10 +38,5 @@ namespace FoodOrderApp.Data.UnitOfWork
         {
             await _context.SaveChangesAsync();
         }
-
-        public async ValueTask DisposeAsync()
-        {
-            await _context.DisposeAsync();
-        }
     }
 }

@@ -15,7 +15,6 @@ namespace FoodOrderApp.Models.OrderModels
         public int UserId { get; set; }
         public UserModel User { get; set; }
 
-
         public ICollection<PizzaOrderModel> PizzaOrders { get; set; }
 
         public OrderStatus Status { get; set; }

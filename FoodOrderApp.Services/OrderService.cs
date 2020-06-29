@@ -12,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FoodOrderApp.Services
@@ -57,17 +56,14 @@ namespace FoodOrderApp.Services
 
                     return new ServiceResult(ResultType.Correct);
                 }
-                else
-                {
-                    throw new Exception("Error during creating order");
-                }
+
+                return new ServiceResult(ResultType.Error, new List<string> { "Error during creation of order" });
             }
             catch(Exception e) 
             {
                 return new ServiceResult(ResultType.Error, new List<string> { e.Message });
             }
         }
-
 
         /// <summary>
         /// Cancels order
@@ -90,8 +86,7 @@ namespace FoodOrderApp.Services
                     return new ServiceResult(ResultType.Edited);
                 }
 
-                throw new Exception("Order does not exist or wrong user was chosen");
-
+                return new ServiceResult(ResultType.Error, new List<string> { "Error during order cancel operation" });
             }
             catch(Exception e)
             {
@@ -120,14 +115,13 @@ namespace FoodOrderApp.Services
                     return new ServiceResult(ResultType.Deleted);
                 }
 
-                throw new Exception($"Order with id {orderId} has not been found");
+                return new ServiceResult(ResultType.Error, new List<string> { $"Order with id {orderId} has not been found" });
             }
             catch(Exception e)
             {
                 return new ServiceResult(ResultType.Error, new List<string> { e.Message });
             }
         }
-
 
         #region PrivateMethods
         private async Task<bool> CheckIfPizzasExist(IEnumerable<int> pizzaIds)
@@ -158,8 +152,10 @@ namespace FoodOrderApp.Services
                 {
                     PizzaModel pizzaToOrder = (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == dto.PizzaId, i => i.Include(d => d.PizzaDetails))).SingleOrDefault();
                     PizzaDetailsModel pizzaDetail = pizzaToOrder.PizzaDetails.FirstOrDefault(x => x.Size == dto.Size);
-                    pizzaToOrder.PizzaDetails = new List<PizzaDetailsModel>();
-                    pizzaToOrder.PizzaDetails.Add(pizzaDetail);
+                    pizzaToOrder.PizzaDetails = new List<PizzaDetailsModel>
+                    {
+                        pizzaDetail
+                    };
 
                     if (pizzaToOrder != null)
                     {
