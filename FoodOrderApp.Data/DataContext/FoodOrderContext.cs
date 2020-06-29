@@ -1,4 +1,5 @@
-﻿using FoodOrderApp.Models.OrderModels;
+﻿using FoodOrderApp.Models.Enums;
+using FoodOrderApp.Models.OrderModels;
 using FoodOrderApp.Models.PizzaModels;
 using FoodOrderApp.Models.PizzaModels.DetailModels;
 using FoodOrderApp.Models.PizzaModels.PhotoModels;
@@ -6,6 +7,7 @@ using FoodOrderApp.Models.UserModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace FoodOrderApp.Data.DataContext
 {
@@ -26,7 +28,7 @@ namespace FoodOrderApp.Data.DataContext
 
             modelBuilder.Entity<PizzaModel>(entity =>
             {
-               // entity.HasMany(pd => pd.PizzaDetails).WithOne(d => d.Pizza).HasForeignKey(k => k.pi);
+                entity.Property(c => c.Category).HasConversion(v => v.ToString(), v => (PizzaCategory)Enum.Parse(typeof(PizzaCategory), v));
                 entity.HasOne(p => p.Photo).WithOne(p => p.Pizza);
                 entity.ToTable("Pizzas");
             });
