@@ -305,6 +305,10 @@ namespace FoodOrderApp.Services
             List<IngredientModel> ingredients = new List<IngredientModel>();
             List<StarterModel> starters = (await _repository.Starters.GetByExpressionAsync(x => x.Id > 0)).ToList();
 
+            //add ingredients that every pizza must have
+            ingredients.Add((await _repository.Ingredients.GetByExpressionAsync(x => x.Name == "Sos", i => i.Include(p => p.IngredientDetails))).SingleOrDefault());
+            ingredients.Add((await _repository.Ingredients.GetByExpressionAsync(x => x.Name == "Ser", i => i.Include(p => p.IngredientDetails))).SingleOrDefault());
+
             // get ingredients with their prices
             foreach (int ingredientId in pizzaToCreate.IngredientIds)
             {
@@ -345,12 +349,8 @@ namespace FoodOrderApp.Services
         /// <returns>Converted pizza object</returns>
         private PizzaToReturnDto CreatePizzaToReturn(PizzaModel pizza)
         {
-            List<string> ingredientsToReturn = new List<string>
-            {
-                "sos",
-                "ser",
-                "oregano"
-            };
+            List<string> ingredientsToReturn = new List<string>();
+
             // convert included ingredients
             foreach (PizzaIngredientsModel i in pizza.PizzaIngredients)
             {
@@ -398,7 +398,7 @@ namespace FoodOrderApp.Services
             {
                 PizzaDetailsModel tmp = new PizzaDetailsModel
                 {
-                    Size = (SizeEnum)starters.IndexOf(starter),
+                    Size = starter.Size,
                     StarterId = starter.Id,
                     Starter = starter,
                 };

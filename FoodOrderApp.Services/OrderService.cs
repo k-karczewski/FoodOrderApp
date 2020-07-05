@@ -28,33 +28,34 @@ namespace FoodOrderApp.Services
         /// <summary>
         /// Creates new order
         /// </summary>
-        /// <param name="pizzas">List of pizzas to order</param>
+        /// <param name="pizzasToOrder">List of pizzas to order</param>
         /// <param name="userId">id of user that makes order</param>
         /// <returns>ServiceResult of statuses correct or error</returns>
-        public async Task<IServiceResult> MakeOrder(ICollection<PizzaToOrderDto> pizzas, int userId)
+        public async Task<IServiceResult> MakeOrder(List<PizzaToOrderDto> pizzasToOrder, int userId)
         {
             try
             {
-                List<int> pizzaIds = pizzas.Select(x => x.PizzaId).ToList();
+                UserModel purchaser = (await _repository.Users.GetByExpressionAsync(x => x.Id == userId)).SingleOrDefault();
 
-                if(await CheckIfPizzasExist(pizzaIds))
+                if(purchaser != null)
                 {
-                    UserModel purchaser = (await _repository.Users.GetByExpressionAsync(x => x.Id == userId, i => i.Include(o => o.Orders))).SingleOrDefault();
-                    List<PizzaOrderModel> pizzaOrder = await ConvertToOrder(pizzas);
+                    List<OrderItemModel> orderItems = await ConvertToOrderItems(pizzasToOrder);
 
-                    OrderModel order = new OrderModel
+                    if(orderItems != null)
                     {
-                        UserId = purchaser.Id,
-                        User = purchaser,
-                        PizzaOrders = pizzaOrder,
-                        Status = OrderStatus.New,
-                        TotalPrice = CountTotalOrderPrice(pizzaOrder)
-                    };
+                        OrderModel order = new OrderModel
+                        {
+                            UserId = purchaser.Id,
+                            User = purchaser,
+                            OrderItems = orderItems,
+                            Status = OrderStatus.New
+                        };
 
-                    await _repository.Orders.CreateAsync(order);
-                    await _repository.SaveChangesAsync();
+                        await _repository.Orders.CreateAsync(order);
+                        await _repository.SaveChangesAsync();
 
-                    return new ServiceResult(ResultType.Correct);
+                        return new ServiceResult(ResultType.Correct);
+                    }
                 }
 
                 return new ServiceResult(ResultType.Error, new List<string> { "Error during creation of order" });
@@ -94,7 +95,6 @@ namespace FoodOrderApp.Services
             }
         }
 
-
         /// <summary>
         /// Deletes order from database
         /// </summary>
@@ -104,7 +104,7 @@ namespace FoodOrderApp.Services
         {
             try
             {
-                OrderModel orderToDelete = (await _repository.Orders.GetByExpressionAsync(x => x.Id == orderId, i => i.Include(po => po.PizzaOrders))).SingleOrDefault();
+                OrderModel orderToDelete = (await _repository.Orders.GetByExpressionAsync(x => x.Id == orderId, i => i.Include(po => po.OrderItems))).SingleOrDefault();
 
                 // order can be deleted only by user with admin privileges so check of userId is not needed
                 if (orderToDelete != null)
@@ -124,55 +124,63 @@ namespace FoodOrderApp.Services
         }
 
         #region PrivateMethods
-        private async Task<bool> CheckIfPizzasExist(IEnumerable<int> pizzaIds)
+        private async Task<List<OrderItemModel>> ConvertToOrderItems(List<PizzaToOrderDto> orderItemsDtos)
         {
-            bool doExist = true;
-
-            foreach(int id in pizzaIds)
-            {
-                PizzaModel p = (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == id)).SingleOrDefault();
-
-                if(p == null)
-                {
-                    doExist = false;
-                    break;
-                }
-            }
-
-            return doExist;
-        }
-
-        private async Task<List<PizzaOrderModel>> ConvertToOrder(IEnumerable<PizzaToOrderDto> orderItems)
-        {
-            List<PizzaOrderModel> order = new List<PizzaOrderModel>();
+            List<OrderItemModel> orderItems = new List<OrderItemModel>();
 
             try
             {
-                foreach (PizzaToOrderDto dto in orderItems)
+                foreach (PizzaToOrderDto item in orderItemsDtos)
                 {
-                    PizzaModel pizzaToOrder = (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == dto.PizzaId, i => i.Include(d => d.PizzaDetails))).SingleOrDefault();
-                    PizzaDetailsModel pizzaDetail = pizzaToOrder.PizzaDetails.FirstOrDefault(x => x.Size == dto.Size);
-                    pizzaToOrder.PizzaDetails = new List<PizzaDetailsModel>
+                    OrderItemModel orderItem = new OrderItemModel
                     {
-                        pizzaDetail
+                        Name = item.Name,
+                        Size = item.Size,
+                        OrderItemIngredients = new List<OrderIngredientModel>()
                     };
+
+                    PizzaModel pizzaToOrder = (await _repository.Pizzas.GetByExpressionAsync(x => x.Name == item.Name, 
+                            i => i.Include(pi => pi.PizzaIngredients).ThenInclude(i => i.Ingredient))).SingleOrDefault();
+
+                    List<int> ingredientsIds = new List<int>();
 
                     if (pizzaToOrder != null)
                     {
-                        order.Add(new PizzaOrderModel
+                        List<IngredientModel> ingredients = pizzaToOrder.PizzaIngredients.Select(x => x.Ingredient).ToList();
+                        ingredientsIds.AddRange(ingredients.Select(x => x.Id).ToList());
+
+                        if (item.RemovedIngredientsIds != null)
                         {
-                            PizzaDetailId = pizzaToOrder.PizzaDetails.FirstOrDefault().Id,
-                            PizzaDetail = pizzaToOrder.PizzaDetails.FirstOrDefault(),
-                            PizzaId = pizzaToOrder.Id
-                        });
+                            RemoveIngredients(ref ingredientsIds, item.RemovedIngredientsIds);
+                        }
+
+                        if (item.AddedIngredientsIds != null)
+                        {
+                            AddIngredients(ref ingredientsIds, item.AddedIngredientsIds);
+                        }
+                    }
+                    else if (item.AddedIngredientsIds != null)
+                    {
+                        ingredientsIds.AddRange(item.AddedIngredientsIds);
                     }
                     else
                     {
                         return null;
                     }
-                }
 
-                return order;
+                    foreach (int ingredientId in ingredientsIds)
+                    {
+                        orderItem.OrderItemIngredients.Add(new OrderIngredientModel
+                        {
+                            IngredientId = ingredientId
+                        });
+                    }
+
+                    orderItem.Price = await CalculateOrderItemPrice(orderItem.OrderItemIngredients.Select(x => x.IngredientId).ToList(), orderItem.Size);
+                    orderItems.Add(orderItem);
+                }
+            
+                return orderItems;
             }
             catch(Exception)
             {
@@ -180,18 +188,47 @@ namespace FoodOrderApp.Services
             }
         }
 
-        private decimal CountTotalOrderPrice(List<PizzaOrderModel> orderItems)
+        private async Task<decimal> CalculateOrderItemPrice(List<int> orderItemIngredientsIds, SizeEnum size)
         {
-            decimal total = 0;
-
-            foreach(PizzaOrderModel item in orderItems)
+            try
             {
-                total += item.PizzaDetail.TotalPrice;
-            }
+                decimal total = ((await _repository.Starters.GetByExpressionAsync(x => x.Size == size)).Single()).Price;
 
-            return total;
+                foreach(int id in orderItemIngredientsIds)
+                {
+                    IngredientModel i = (await _repository.Ingredients.GetByExpressionAsync(x => x.Id == id, i => i.Include(d => d.IngredientDetails))).Single();
+                    total += i.IngredientDetails.FirstOrDefault(x => x.Size == size).Price;
+                }
+
+                return total;
+            }
+            catch(Exception)
+            {
+                throw;
+            }
         }
 
+        private void AddIngredients(ref List<int> ingredientList, List<int> ingredientsToAdd)
+        {
+            foreach (int ingredient in ingredientsToAdd)
+            {
+                if (ingredientList.Where(x => x == ingredient) == null)
+                {
+                    ingredientList.Add(ingredient);
+                }
+            }
+        }
+
+        private void RemoveIngredients(ref List<int> ingredientList, List<int> ingredientsToRemove)
+        {
+            foreach (int ingredient in ingredientsToRemove)
+            {
+                if (ingredientList.Where(x => x == ingredient) != null)
+                {
+                    ingredientList.Remove(ingredient);
+                }
+            }
+        }
         #endregion
     }
 }
