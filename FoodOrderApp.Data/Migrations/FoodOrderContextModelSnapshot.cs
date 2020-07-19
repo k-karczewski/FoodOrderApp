@@ -48,7 +48,10 @@ namespace FoodOrderApp.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(4,2)");
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
                     b.Property<int>("Size")
                         .HasColumnType("int");
@@ -71,7 +74,7 @@ namespace FoodOrderApp.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(4,2)");
+                        .HasColumnType("decimal(6,2)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -94,7 +97,7 @@ namespace FoodOrderApp.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(4,2)");
+                        .HasColumnType("decimal(6,2)");
 
                     b.Property<int>("Size")
                         .HasColumnType("int");
@@ -123,7 +126,7 @@ namespace FoodOrderApp.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(4,2)");
+                        .HasColumnType("decimal(6,2)");
 
                     b.HasKey("Id");
 
@@ -219,7 +222,7 @@ namespace FoodOrderApp.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(4,2)");
+                        .HasColumnType("decimal(6,2)");
 
                     b.Property<int>("Size")
                         .HasColumnType("int");

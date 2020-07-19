@@ -56,7 +56,7 @@ namespace FoodOrderApp.Data.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(nullable: true),
-                    Price = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(6,2)", nullable: false),
                     Size = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -97,7 +97,7 @@ namespace FoodOrderApp.Data.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Size = table.Column<int>(nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(6,2)", nullable: false),
                     IngredientId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -183,7 +183,7 @@ namespace FoodOrderApp.Data.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    TotalPrice = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "decimal(6,2)", nullable: false),
                     Size = table.Column<int>(nullable: false),
                     PizzaId = table.Column<int>(nullable: false),
                     StarterId = table.Column<int>(nullable: false)
@@ -211,7 +211,7 @@ namespace FoodOrderApp.Data.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    TotalPrice = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "decimal(6,2)", nullable: false),
                     UserId = table.Column<int>(nullable: false),
                     Status = table.Column<int>(nullable: false)
                 },
@@ -319,7 +319,7 @@ namespace FoodOrderApp.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(nullable: true),
                     Size = table.Column<int>(nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(6,2)", nullable: false),
                     OrderId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FoodOrderApp.Data.Migrations
 {
     [DbContext(typeof(FoodOrderContext))]
-    [Migration("20200704170753_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20200719163526_AddedQuantityColumn")]
+    partial class AddedQuantityColumn
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -51,6 +51,9 @@ namespace FoodOrderApp.Data.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(6,2)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
                     b.Property<int>("Size")
                         .HasColumnType("int");

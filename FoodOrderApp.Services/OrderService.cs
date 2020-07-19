@@ -124,59 +124,41 @@ namespace FoodOrderApp.Services
         }
 
         #region PrivateMethods
-        private async Task<List<OrderItemModel>> ConvertToOrderItems(List<PizzaToOrderDto> orderItemsDtos)
+        private async Task<List<OrderItemModel>> ConvertToOrderItems(List<PizzaToOrderDto> orderItemDtos)
         {
             List<OrderItemModel> orderItems = new List<OrderItemModel>();
 
             try
             {
-                foreach (PizzaToOrderDto item in orderItemsDtos)
+                foreach (PizzaToOrderDto item in orderItemDtos)
                 {
+                    // get pizza with id that came from spa
+                    PizzaModel pizzaToOrder = (await _repository.Pizzas.GetByExpressionAsync(x => x.Id == item.Id)).SingleOrDefault();
+
                     OrderItemModel orderItem = new OrderItemModel
                     {
-                        Name = item.Name,
+                        Name = pizzaToOrder.Name,
                         Size = item.Size,
+                        Quantity = item.Quantity,
                         OrderItemIngredients = new List<OrderIngredientModel>()
                     };
 
-                    PizzaModel pizzaToOrder = (await _repository.Pizzas.GetByExpressionAsync(x => x.Name == item.Name, 
-                            i => i.Include(pi => pi.PizzaIngredients).ThenInclude(i => i.Ingredient))).SingleOrDefault();
-
-                    List<int> ingredientsIds = new List<int>();
-
-                    if (pizzaToOrder != null)
+                    foreach (int id in item.Ingredients)
                     {
-                        List<IngredientModel> ingredients = pizzaToOrder.PizzaIngredients.Select(x => x.Ingredient).ToList();
-                        ingredientsIds.AddRange(ingredients.Select(x => x.Id).ToList());
-
-                        if (item.RemovedIngredientsIds != null)
+                        orderItem.OrderItemIngredients.Add(new OrderIngredientModel
                         {
-                            RemoveIngredients(ref ingredientsIds, item.RemovedIngredientsIds);
-                        }
+                            IngredientId = id
+                        });
+                    }
 
-                        if (item.AddedIngredientsIds != null)
-                        {
-                            AddIngredients(ref ingredientsIds, item.AddedIngredientsIds);
-                        }
-                    }
-                    else if (item.AddedIngredientsIds != null)
-                    {
-                        ingredientsIds.AddRange(item.AddedIngredientsIds);
-                    }
-                    else
+                    orderItem.Price = await CalculateOrderItemPrice(orderItem.OrderItemIngredients.Select(x => x.IngredientId).ToList(), orderItem.Size, item.Quantity);
+
+                    // validate price of order item
+                    if(orderItem.Price != item.Price)
                     {
                         return null;
                     }
 
-                    foreach (int ingredientId in ingredientsIds)
-                    {
-                        orderItem.OrderItemIngredients.Add(new OrderIngredientModel
-                        {
-                            IngredientId = ingredientId
-                        });
-                    }
-
-                    orderItem.Price = await CalculateOrderItemPrice(orderItem.OrderItemIngredients.Select(x => x.IngredientId).ToList(), orderItem.Size);
                     orderItems.Add(orderItem);
                 }
             
@@ -188,11 +170,11 @@ namespace FoodOrderApp.Services
             }
         }
 
-        private async Task<decimal> CalculateOrderItemPrice(List<int> orderItemIngredientsIds, SizeEnum size)
+        private async Task<decimal> CalculateOrderItemPrice(List<int> orderItemIngredientsIds, SizeEnum size, int quantity)
         {
             try
             {
-                decimal total = ((await _repository.Starters.GetByExpressionAsync(x => x.Size == size)).Single()).Price;
+                decimal total = (await _repository.Starters.GetByExpressionAsync(x => x.Size == size)).Single().Price;
 
                 foreach(int id in orderItemIngredientsIds)
                 {
@@ -200,33 +182,11 @@ namespace FoodOrderApp.Services
                     total += i.IngredientDetails.FirstOrDefault(x => x.Size == size).Price;
                 }
 
-                return total;
+                return total * quantity;
             }
             catch(Exception)
             {
                 throw;
-            }
-        }
-
-        private void AddIngredients(ref List<int> ingredientList, List<int> ingredientsToAdd)
-        {
-            foreach (int ingredient in ingredientsToAdd)
-            {
-                if (ingredientList.Where(x => x == ingredient) == null)
-                {
-                    ingredientList.Add(ingredient);
-                }
-            }
-        }
-
-        private void RemoveIngredients(ref List<int> ingredientList, List<int> ingredientsToRemove)
-        {
-            foreach (int ingredient in ingredientsToRemove)
-            {
-                if (ingredientList.Where(x => x == ingredient) != null)
-                {
-                    ingredientList.Remove(ingredient);
-                }
             }
         }
         #endregion

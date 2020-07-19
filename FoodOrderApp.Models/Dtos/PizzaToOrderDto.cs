@@ -8,11 +8,18 @@ namespace FoodOrderApp.Models.Dtos
     public class PizzaToOrderDto
     {
         [Required]
-        public string Name { get; set; }
+        public int Id { get; set; }
+
+        [Required]
+        public decimal Price { get; set; }
+
         [Required]
         public SizeEnum Size { get; set; }
 
-        public List<int> AddedIngredientsIds { get; set; }
-        public List<int> RemovedIngredientsIds { get; set; }
+        [Required]
+        public List<int> Ingredients { get; set; }
+
+        [Required]
+        public int Quantity { get; set; }
     }
 }

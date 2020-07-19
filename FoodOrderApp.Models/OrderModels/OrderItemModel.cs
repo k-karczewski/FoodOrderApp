@@ -9,6 +9,7 @@ namespace FoodOrderApp.Models.OrderModels
         public string Name { get; set; }
         public SizeEnum Size { get; set; }
         public decimal Price { get; set; }
+        public int Quantity { get; set; }
 
         public ICollection<OrderIngredientModel> OrderItemIngredients { get; set; }
 
