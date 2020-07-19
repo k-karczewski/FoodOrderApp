@@ -11,6 +11,6 @@ namespace FoodOrderApp.Models.Dtos
         public string Category { get; set; }
 
         public ICollection<PriceToReturnDto> TotalPrices { get; set; }
-        public ICollection<string> Ingredients { get; set; }
+        public ICollection<int> Ingredients { get; set; }
     }
 }

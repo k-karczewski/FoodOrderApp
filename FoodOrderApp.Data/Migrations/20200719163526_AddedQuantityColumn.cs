@@ -2,22 +2,22 @@
 
 namespace FoodOrderApp.Data.Migrations
 {
-    public partial class AddedCategoryColumn : Migration
+    public partial class AddedQuantityColumn : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Category",
-                table: "Pizzas",
+            migrationBuilder.AddColumn<int>(
+                name: "Quantity",
+                table: "PizzaOrders",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: 0);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Category",
-                table: "Pizzas");
+                name: "Quantity",
+                table: "PizzaOrders");
         }
     }
 }

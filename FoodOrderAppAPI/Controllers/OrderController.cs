@@ -25,7 +25,7 @@ namespace FoodOrderAppAPI.Controllers
         }
 
         [HttpPost("new")]
-        public async Task<IActionResult> MakeOrder(ICollection<PizzaToOrderDto> orderItems)
+        public async Task<IActionResult> MakeOrder(List<PizzaToOrderDto> orderItems)
         {
             IServiceResult orderResult = await _orderService.MakeOrder(orderItems, int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value));
 

@@ -15,7 +15,7 @@ namespace FoodOrderApp.Interfaces.Services
         /// <param name="pizzas">List of pizzas to order</param>
         /// <param name="userId">id of user that makes order</param>
         /// <returns>ServiceResult of statuses correct or error</returns>
-        Task<IServiceResult> MakeOrder(ICollection<PizzaToOrderDto> pizzas, int userId);
+        Task<IServiceResult> MakeOrder(List<PizzaToOrderDto> pizzas, int userId);
 
         /// <summary>
         /// Cancels order

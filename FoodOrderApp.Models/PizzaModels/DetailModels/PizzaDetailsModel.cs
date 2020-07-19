@@ -1,7 +1,6 @@
 ﻿using FoodOrderApp.Models.Enums;
-using System;
+using FoodOrderApp.Models.OrderModels;
 using System.Collections.Generic;
-using System.Text;
 
 namespace FoodOrderApp.Models.PizzaModels.DetailModels
 {
@@ -11,15 +10,10 @@ namespace FoodOrderApp.Models.PizzaModels.DetailModels
         public decimal TotalPrice { get; set; }
         public SizeEnum Size { get; set; }
 
-
         public int PizzaId { get; set; }
         public PizzaModel Pizza { get; set; }
 
-
         public int StarterId { get; set; }
         public StarterModel Starter { get; set; }
-
-
-        public ICollection<PizzaOrderModel> PizzaOrders { get; set; }
     }
 }

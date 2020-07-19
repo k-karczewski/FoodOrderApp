@@ -5,8 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20200621103818_ChangedOnDeleteBehavior.cs" />
-    <Compile Remove="Migrations\20200621103818_ChangedOnDeleteBehavior.Designer.cs" />
+    <Compile Remove="Migrations\20200719163411_ChangedPriceColumnPrecision.cs" />
+    <Compile Remove="Migrations\20200719163411_ChangedPriceColumnPrecision.Designer.cs" />
+    <Compile Remove="Migrations\20200719163451_ChangedPriceColumnPrecision.cs" />
+    <Compile Remove="Migrations\20200719163451_ChangedPriceColumnPrecision.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

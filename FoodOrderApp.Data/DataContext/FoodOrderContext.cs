@@ -17,7 +17,7 @@ namespace FoodOrderApp.Data.DataContext
         public DbSet<StarterModel> Starters { get; set; }
         public DbSet<PizzaModel> Pizzas { get; set; }
         public DbSet<PhotoModel> Photos { get; set; }
-        public DbSet<PizzaOrderModel> PizzaOrders { get; set; }
+        public DbSet<OrderItemModel> PizzaOrders { get; set; }
         public DbSet<OrderModel> Orders { get; set; }
 
         public FoodOrderContext(DbContextOptions options) : base(options) { }
@@ -45,26 +45,27 @@ namespace FoodOrderApp.Data.DataContext
             {
                 entity.HasOne(p => p.Pizza).WithMany(pd => pd.PizzaDetails).HasForeignKey(k => k.PizzaId);
                 entity.HasOne(s => s.Starter).WithMany(pd => pd.Pizzas).HasForeignKey(k => k.StarterId);
-                entity.Property(p => p.TotalPrice).HasColumnType("decimal(4,2)");
+                entity.Property(p => p.TotalPrice).HasColumnType("decimal(6,2)");
                 entity.ToTable("PizzaDetails");
             });
 
-            modelBuilder.Entity<PizzaOrderModel>(entity =>
+            modelBuilder.Entity<OrderItemModel>(entity =>
             {
-                entity.HasKey(po => new { po.PizzaDetailId, po.OrderId, po.PizzaId });
+                entity.HasKey(po => po.Id);
+                entity.Property(p => p.Price).HasColumnType("decimal(6,2)");
             });
 
             modelBuilder.Entity<OrderModel>(entity =>
             {
-                entity.Property(p => p.TotalPrice).HasColumnType("decimal(4,2)");
-                entity.HasMany(po => po.PizzaOrders).WithOne(o => o.Order).OnDelete(DeleteBehavior.Cascade);
+                entity.Property(p => p.TotalPrice).HasColumnType("decimal(6,2)");
+                entity.HasMany(po => po.OrderItems).WithOne(o => o.Order).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(u => u.User).WithMany(o => o.Orders).HasForeignKey(k => k.UserId);
             });
 
             modelBuilder.Entity<IngredientDetailsModel>(entity =>
             {
                 entity.HasOne(i => i.Ingredient).WithMany(id => id.IngredientDetails).HasForeignKey(k => k.IngredientId);
-                entity.Property(p => p.Price).HasColumnType("decimal(4,2)");
+                entity.Property(p => p.Price).HasColumnType("decimal(6,2)");
                 entity.ToTable("IngredientDetails");
             });
            
@@ -76,8 +77,13 @@ namespace FoodOrderApp.Data.DataContext
             modelBuilder.Entity<StarterModel>(entity =>
             {
                 entity.HasKey(k => k.Id);
-                entity.Property(p => p.Price).HasColumnType("decimal(4,2)");
+                entity.Property(p => p.Price).HasColumnType("decimal(6,2)");
                 entity.ToTable("Starters");
+            });
+
+            modelBuilder.Entity<OrderIngredientModel>(entity =>
+            {
+                entity.HasKey(k => new { k.OrderItemId, k.IngredientId });
             });
                 
 

@@ -19,6 +19,50 @@ namespace FoodOrderApp.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("FoodOrderApp.Models.OrderModels.OrderIngredientModel", b =>
+                {
+                    b.Property<int>("OrderItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IngredientId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderItemId", "IngredientId");
+
+                    b.HasIndex("IngredientId");
+
+                    b.ToTable("OrderIngredientModel");
+                });
+
+            modelBuilder.Entity("FoodOrderApp.Models.OrderModels.OrderItemModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("PizzaOrders");
+                });
+
             modelBuilder.Entity("FoodOrderApp.Models.OrderModels.OrderModel", b =>
                 {
                     b.Property<int>("Id")
@@ -30,7 +74,7 @@ namespace FoodOrderApp.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(4,2)");
+                        .HasColumnType("decimal(6,2)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -53,7 +97,7 @@ namespace FoodOrderApp.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(4,2)");
+                        .HasColumnType("decimal(6,2)");
 
                     b.Property<int>("Size")
                         .HasColumnType("int");
@@ -82,7 +126,7 @@ namespace FoodOrderApp.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(4,2)");
+                        .HasColumnType("decimal(6,2)");
 
                     b.HasKey("Id");
 
@@ -167,24 +211,6 @@ namespace FoodOrderApp.Data.Migrations
                     b.ToTable("Pizzas");
                 });
 
-            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PizzaOrderModel", b =>
-                {
-                    b.Property<int>("PizzaDetailId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PizzaId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PizzaDetailId", "OrderId", "PizzaId");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("PizzaOrders");
-                });
-
             modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.StarterModel", b =>
                 {
                     b.Property<int>("Id")
@@ -196,7 +222,10 @@ namespace FoodOrderApp.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(4,2)");
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -400,6 +429,30 @@ namespace FoodOrderApp.Data.Migrations
                     b.ToTable("UserTokens");
                 });
 
+            modelBuilder.Entity("FoodOrderApp.Models.OrderModels.OrderIngredientModel", b =>
+                {
+                    b.HasOne("FoodOrderApp.Models.PizzaModels.IngredientModel", "Ingredient")
+                        .WithMany()
+                        .HasForeignKey("IngredientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FoodOrderApp.Models.OrderModels.OrderItemModel", "OrderItem")
+                        .WithMany("OrderItemIngredients")
+                        .HasForeignKey("OrderItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FoodOrderApp.Models.OrderModels.OrderItemModel", b =>
+                {
+                    b.HasOne("FoodOrderApp.Models.OrderModels.OrderModel", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("FoodOrderApp.Models.OrderModels.OrderModel", b =>
                 {
                     b.HasOne("FoodOrderApp.Models.UserModels.UserModel", "User")
@@ -453,21 +506,6 @@ namespace FoodOrderApp.Data.Migrations
                     b.HasOne("FoodOrderApp.Models.PizzaModels.PizzaModel", "Pizza")
                         .WithMany("PizzaIngredients")
                         .HasForeignKey("PizzaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("FoodOrderApp.Models.PizzaModels.PizzaOrderModel", b =>
-                {
-                    b.HasOne("FoodOrderApp.Models.OrderModels.OrderModel", "Order")
-                        .WithMany("PizzaOrders")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FoodOrderApp.Models.PizzaModels.DetailModels.PizzaDetailsModel", "PizzaDetail")
-                        .WithMany("PizzaOrders")
-                        .HasForeignKey("PizzaDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
