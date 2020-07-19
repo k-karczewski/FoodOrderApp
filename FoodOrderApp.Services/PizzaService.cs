@@ -349,12 +349,12 @@ namespace FoodOrderApp.Services
         /// <returns>Converted pizza object</returns>
         private PizzaToReturnDto CreatePizzaToReturn(PizzaModel pizza)
         {
-            List<string> ingredientsToReturn = new List<string>();
+            List<int> ingredientsToReturn = new List<int>();
 
             // convert included ingredients
             foreach (PizzaIngredientsModel i in pizza.PizzaIngredients)
             {
-                ingredientsToReturn.Add(i.Ingredient.Name);
+                ingredientsToReturn.Add(i.Ingredient.Id);
             }
 
             // create object to return
