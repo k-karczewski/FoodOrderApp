@@ -62,12 +62,13 @@ namespace FoodOrderAppAPI.Controllers
                 {
                     return Ok(new
                     {
-                        token = loginResult.ReturnedObject
+                        token = loginResult.ReturnedObject,
+                        username = userToLogin.Username.ToLower()
                     });
                 }
                 else
                 {
-                    return BadRequest(loginResult.Errors);
+                    return Unauthorized();
                 }
             }
             else
